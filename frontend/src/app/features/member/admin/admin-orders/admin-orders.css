@@ -1,0 +1,219 @@
+/* Admin Orders — KPIs */
+.admin-order-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 640px) {
+  .admin-order-kpis { grid-template-columns: 1fr; }
+}
+
+/* Filters */
+.admin-order-filters {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid rgba(231,229,220,0.4);
+  border-radius: 0.375rem;
+  padding: 0 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.filter-group:focus-within {
+  border-color: var(--primary);
+}
+
+.filter-icon {
+  color: #a8a29e;
+  font-size: 1.125rem;
+  margin-right: 0.5rem;
+}
+
+.filter-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.875rem;
+  padding: 0.65rem 0;
+  width: 100%;
+  color: #1c1c19;
+  font-family: 'Manrope', sans-serif;
+}
+
+.filter-input::placeholder {
+  color: #a8a29e;
+}
+
+.filter-select {
+  padding: 0.65rem 1rem;
+  font-size: 0.8125rem;
+  font-family: 'Manrope', sans-serif;
+  border: 1px solid rgba(231,229,220,0.4);
+  border-radius: 0.375rem;
+  background: white;
+  color: #1c1c19;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filter-select:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* Empty state */
+.admin-order-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #a8a29e;
+}
+
+.admin-order-empty .material-symbols-outlined {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+  color: #d6d3d1;
+}
+
+.admin-order-empty p {
+  font-size: 0.95rem;
+}
+
+/* Table */
+.admin-order-table-wrap {
+  background: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  margin-bottom: 2rem;
+}
+
+.admin-order-head {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 1.5fr 1.5fr 0.7fr 1.2fr 1.2fr 1.2fr;
+  padding: 0.85rem 1.25rem;
+  background: var(--surface-high);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #78716c;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+}
+
+.admin-order-row {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 1.5fr 1.5fr 0.7fr 1.2fr 1.2fr 1.2fr;
+  padding: 1rem 1.25rem;
+  align-items: center;
+  border-bottom: 1px solid rgba(231,229,220,0.3);
+  font-size: 0.875rem;
+  transition: background-color 0.15s;
+}
+
+.admin-order-row:last-child { border-bottom: none; }
+.admin-order-row:hover { background-color: var(--surface-low); }
+
+.admin-order-id {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: 'Manrope', sans-serif;
+}
+
+.admin-customer-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1c1c19;
+  margin: 0;
+}
+
+.admin-customer-email {
+  font-size: 0.6875rem;
+  color: #a8a29e;
+  margin: 0.125rem 0 0;
+}
+
+.admin-order-store {
+  font-size: 0.8125rem;
+  color: #57534e;
+  font-weight: 500;
+}
+
+.admin-order-date {
+  font-size: 0.8125rem;
+  color: #78716c;
+}
+
+.admin-order-items {
+  font-size: 0.8125rem;
+  color: #78716c;
+  text-align: center;
+}
+
+.admin-order-amount {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1c1c19;
+}
+
+/* Status badges */
+.order-status {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.order-status--completed,
+.order-status--delivered { background-color: var(--tertiary-container); color: #866b00; }
+.order-status--shipped   { background-color: var(--primary-light); color: #c04600; }
+.order-status--pending   { background-color: var(--secondary-container); color: #57534e; }
+.order-status--cancelled { background-color: #fef2f2; color: #b91c1c; }
+
+/* Status select */
+.status-select {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: 'Manrope', sans-serif;
+  border: 1px solid rgba(231,229,220,0.4);
+  border-radius: 0.25rem;
+  background: var(--surface-low);
+  color: #1c1c19;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.status-select:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .admin-order-head { display: none; }
+  .admin-order-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto auto;
+    gap: 0.35rem;
+    padding: 1rem;
+  }
+  .admin-order-customer { grid-column: span 2; }
+}

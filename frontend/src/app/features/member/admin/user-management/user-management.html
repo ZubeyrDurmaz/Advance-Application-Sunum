@@ -1,0 +1,98 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Admin Panel</h3>
+      <p class="sidebar-subtitle">System Control</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/admin']"><span class="material-symbols-outlined">admin_panel_settings</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/admin/stores']"><span class="material-symbols-outlined">storefront</span><span>Stores</span></a>
+      <a class="nav-link active" [routerLink]="['/admin/users']"><span class="material-symbols-outlined">manage_accounts</span><span>Users</span></a>
+      <a class="nav-link" [routerLink]="['/admin/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link" [routerLink]="['/admin/products']"><span class="material-symbols-outlined">inventory_2</span><span>Products</span></a>
+      <a class="nav-link" [routerLink]="['/admin/discounts']"><span class="material-symbols-outlined">loyalty</span><span>Discounts</span></a>
+      <a class="nav-link" [routerLink]="['/admin/analytics']"><span class="material-symbols-outlined">monitoring</span><span>Analytics</span></a>
+      <a class="nav-link" [routerLink]="['/admin/config']"><span class="material-symbols-outlined">tune</span><span>Config</span></a>
+    </nav>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <span class="section-label">User Management</span>
+      <h1 class="corp-heading">Users</h1>
+      <p class="corp-subtext">Manage all platform users — update roles and monitor registrations.</p>
+    </header>
+
+    @if (errorMessage) {
+      <p style="color:#e57373;margin-bottom:1rem;">{{ errorMessage }}</p>
+    }
+
+    <div class="inv-stats" style="margin-bottom:2rem;">
+      <div class="inv-stat"><p class="stat-label">Total</p><p class="inv-stat-value serif">{{ users().length }}</p></div>
+      <div class="inv-stat"><p class="stat-label">Individual</p><p class="inv-stat-value serif">{{ users().filter(u => u.role === 'INDIVIDUAL').length }}</p></div>
+      <div class="inv-stat"><p class="stat-label">Corporate</p><p class="inv-stat-value serif">{{ users().filter(u => u.role === 'CORPORATE').length }}</p></div>
+      <div class="inv-stat"><p class="stat-label">Admin</p><p class="inv-stat-value serif">{{ users().filter(u => u.role === 'ADMIN').length }}</p></div>
+    </div>
+
+    <div class="inv-toolbar">
+      <div class="inv-search-wrap">
+        <span class="material-symbols-outlined inv-search-icon">search</span>
+        <input class="inv-search" type="text" placeholder="Search by name or email…"
+          [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+      </div>
+      <div class="inv-filter-tabs">
+        <button class="inv-tab" [class.inv-tab--active]="filterRole() === 'all'" (click)="filterRole.set('all')">All</button>
+        <button class="inv-tab" [class.inv-tab--active]="filterRole() === 'INDIVIDUAL'" (click)="filterRole.set('INDIVIDUAL')">Individual</button>
+        <button class="inv-tab" [class.inv-tab--active]="filterRole() === 'CORPORATE'" (click)="filterRole.set('CORPORATE')">Corporate</button>
+        <button class="inv-tab" [class.inv-tab--active]="filterRole() === 'ADMIN'" (click)="filterRole.set('ADMIN')">Admin</button>
+      </div>
+    </div>
+
+    @if (loading) {
+      <p style="color:#888;padding:2rem;">Loading users…</p>
+    } @else {
+      <div class="inv-table">
+        <div class="um-table-head">
+          <span>User</span>
+          <span>Role</span>
+          <span>Joined</span>
+          <span>Last Activity</span>
+          <span>Change Role</span>
+        </div>
+        @for (u of filtered(); track u.id) {
+          <div class="um-row">
+            <div>
+              <p class="inv-product-name">{{ u.name }}</p>
+              <p class="inv-product-brand">{{ u.email }}</p>
+            </div>
+            <span class="um-role um-role--{{ u.role | lowercase }}">{{ u.role }}</span>
+            <span class="ord-date">{{ formatDate(u.createdAt) }}</span>
+            <span class="ord-date um-last-activity">
+              @if (u.lastActivity) {
+                {{ formatDate(u.lastActivity) }}
+              } @else {
+                <span style="color:#555;">No activity</span>
+              }
+            </span>
+            <div class="ord-status-btns">
+              <button class="ord-status-btn" [class.ord-status-btn--active]="u.role === 'INDIVIDUAL'"
+                (click)="updateRole(u.id, 'INDIVIDUAL')">Individual</button>
+              <button class="ord-status-btn" [class.ord-status-btn--active]="u.role === 'CORPORATE'"
+                (click)="updateRole(u.id, 'CORPORATE')">Corporate</button>
+              <button class="ord-status-btn" [class.ord-status-btn--active]="u.role === 'ADMIN'"
+                (click)="updateRole(u.id, 'ADMIN')">Admin</button>
+            </div>
+          </div>
+        }
+        @if (!filtered().length) {
+          <div class="inv-empty"><span class="material-symbols-outlined">group</span><p>No users found.</p></div>
+        }
+      </div>
+    }
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+</footer>

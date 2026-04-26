@@ -1,0 +1,97 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Corporate Hub</h3>
+      <p class="sidebar-subtitle">Store Management</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/corporate']"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/corporate/inventory']"><span class="material-symbols-outlined">inventory_2</span><span>Inventory</span></a>
+      <a class="nav-link" [routerLink]="['/corporate/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link" [routerLink]="['/corporate/analytics']"><span class="material-symbols-outlined">bar_chart</span><span>Analytics</span></a>
+      <a class="nav-link" [routerLink]="['/corporate/customers']"><span class="material-symbols-outlined">group</span><span>Customers</span></a>
+      <a class="nav-link active" [routerLink]="['/corporate/corp-settings']"><span class="material-symbols-outlined icon-filled">settings</span><span>Settings</span></a>
+    </nav>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <span class="section-label">Configuration</span>
+      <h1 class="corp-heading">Store Settings</h1>
+      <p class="corp-subtext">Manage your store profile and business information.</p>
+    </header>
+
+    @if (loading) {
+      <p style="color:#888;padding:2rem;">Loading…</p>
+    } @else {
+      @if (errorMessage) {
+        <p style="color:#e57373;margin-bottom:1rem;">{{ errorMessage }}</p>
+      }
+      @if (saved) {
+        <p style="color:#81c784;margin-bottom:1rem;">Settings saved successfully.</p>
+      }
+
+      <div class="cs-grid">
+        <section class="cs-section">
+          <h3 class="settings-section-title serif">Store Profile</h3>
+
+          @if (store) {
+            <div style="margin-bottom:1.5rem;padding:1rem;background:#111;border-radius:4px;border:1px solid #222;">
+              <p style="color:#888;font-size:0.75rem;margin-bottom:0.5rem;">CURRENT STATS</p>
+              <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+                <div>
+                  <p style="color:#888;font-size:0.75rem;">Products</p>
+                  <p style="color:#f0f0f0;">{{ store.productCount }}</p>
+                </div>
+                <div>
+                  <p style="color:#888;font-size:0.75rem;">Orders</p>
+                  <p style="color:#f0f0f0;">{{ store.orderCount }}</p>
+                </div>
+                <div>
+                  <p style="color:#888;font-size:0.75rem;">Revenue</p>
+                  <p style="color:#c9a84c;">{{ formatPrice(store.totalRevenue) }}</p>
+                </div>
+                <div>
+                  <p style="color:#888;font-size:0.75rem;">Status</p>
+                  <p style="color:#f0f0f0;">{{ store.status }}</p>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="settings-form">
+            <div class="form-field">
+              <label class="form-label">Store Name</label>
+              <input class="form-input" type="text" [(ngModel)]="storeName" name="storeName" />
+            </div>
+            @if (store) {
+              <div class="form-field">
+                <label class="form-label">Owner</label>
+                <input class="form-input" type="text" [value]="store.ownerName" disabled />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Owner Email</label>
+                <input class="form-input" type="text" [value]="store.ownerEmail" disabled />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Member Since</label>
+                <input class="form-input" type="text" [value]="store.createdAt ? store.createdAt.split('T')[0] : ''" disabled />
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn-save" (click)="saveSettings()" [disabled]="saving">
+          {{ saving ? 'Saving…' : 'Save Changes' }}
+        </button>
+      </div>
+    }
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+</footer>

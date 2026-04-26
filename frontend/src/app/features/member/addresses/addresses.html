@@ -1,0 +1,314 @@
+<div class="page-layout">
+  <aside class="sidebar" role="complementary" aria-label="Member navigation">
+    <div class="sidebar-header">
+      <h1 class="sidebar-title">Member Lounge</h1>
+      <p class="sidebar-subtitle">Private Collection</p>
+    </div>
+    <nav class="sidebar-nav" aria-label="Main navigation">
+      <a class="nav-link" [routerLink]="['/dashboard']" aria-label="Go to Dashboard"><span class="material-symbols-outlined" aria-hidden="true">dashboard</span>Dashboard</a>
+      <a class="nav-link" [routerLink]="['/order-history']" aria-label="Go to Order History"><span class="material-symbols-outlined" aria-hidden="true">history</span>History</a>
+      <a class="nav-link" [routerLink]="['/payments']" aria-label="Go to Payments"><span class="material-symbols-outlined" aria-hidden="true">payments</span>Payments</a>
+      <a class="nav-link active" [routerLink]="['/addresses']" aria-current="page" aria-label="Addresses (current page)"><span class="material-symbols-outlined" aria-hidden="true">home_pin</span>Addresses</a>
+      <a class="nav-link" [routerLink]="['/settings']" aria-label="Go to Settings"><span class="material-symbols-outlined" aria-hidden="true">settings</span>Settings</a>
+    </nav>
+  </aside>
+
+  <main class="addr-main" role="main">
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="alert alert-success" role="alert" aria-live="polite">
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage && !showModal" class="alert alert-error" role="alert" aria-live="assertive">
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <header class="addr-header">
+      <div>
+        <h2 class="addr-heading serif">Shipping &amp; Billing</h2>
+        <p class="addr-subtext">Manage your global delivery destinations and billing information. Each address is secured for your next acquisition.</p>
+      </div>
+      <button class="btn-add-address" (click)="openCreateModal()" aria-label="Add new address">
+        <span class="material-symbols-outlined" aria-hidden="true">add</span>Add New Address
+      </button>
+    </header>
+
+    <!-- Loading Skeleton -->
+    <div *ngIf="isLoading && isInitialLoad" class="skeleton-grid" role="status" aria-live="polite" aria-label="Loading addresses">
+      <app-skeleton-card type="address"></app-skeleton-card>
+      <app-skeleton-card type="address"></app-skeleton-card>
+      <app-skeleton-card type="address"></app-skeleton-card>
+    </div>
+
+    <!-- Loading Spinner (for subsequent loads) -->
+    <div *ngIf="isLoading && !isInitialLoad" class="loading-spinner" role="status" aria-live="polite" aria-label="Loading addresses">
+      <span class="material-symbols-outlined spinning" aria-hidden="true">progress_activity</span>
+      <p>Yükleniyor...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && addresses.length === 0 && !billingProfile" class="empty-state" role="status">
+      <span class="material-symbols-outlined" aria-hidden="true">location_off</span>
+      <p>Henüz adres eklenmedi</p>
+      <button class="btn-primary" (click)="openCreateModal()" aria-label="Add your first address">İlk Adresinizi Ekleyin</button>
+    </div>
+
+    <!-- Addresses Grid -->
+    <div *ngIf="!isLoading && (addresses.length > 0 || billingProfile)" class="addr-grid" role="list" aria-label="Addresses">
+      <article *ngFor="let address of addresses" 
+           [class.address-card]="true" 
+           [class.primary]="address.isDefault"
+           [class.secondary]="!address.isDefault"
+           role="listitem"
+           [attr.aria-label]="(address.isDefault ? 'Default address: ' : 'Address: ') + (address.addressTitle || 'Adres') + ', ' + address.city">
+        <div class="address-card-top">
+          <div>
+            <span *ngIf="address.isDefault" class="address-tag default" role="status">Default Shipping</span>
+            <span *ngIf="!address.isDefault" class="address-tag secondary-tag">Secondary</span>
+            <h3 class="address-title serif">{{ address.addressTitle || 'Adres' }}</h3>
+          </div>
+          <div class="address-actions" role="group" aria-label="Address actions">
+            <button class="icon-btn" (click)="openEditModal(address)" aria-label="Edit address">
+              <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+            </button>
+            <button class="icon-btn danger" (click)="deleteAddress(address.id)" aria-label="Delete address">
+              <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+            </button>
+          </div>
+        </div>
+        <div class="address-lines">
+          <p>{{ address.fullAddress }}</p>
+          <p>{{ address.city }}{{ address.zipCode ? ', ' + address.zipCode : '' }}</p>
+        </div>
+        <div class="address-footer">
+          <div *ngIf="address.isDefault" class="address-active-dot" aria-label="Active default address"></div>
+          <button *ngIf="!address.isDefault" class="btn-set-default" (click)="setAsDefault(address.id)" aria-label="Set as default address">
+            Set as Default
+          </button>
+        </div>
+      </article>
+
+      <!-- Dynamic Billing Address Card -->
+      <article *ngIf="billingProfile" class="address-card secondary" role="listitem" aria-label="Billing Address">
+        <div class="address-card-top">
+          <div>
+            <span class="address-tag billing">Billing Address</span>
+            <h3 class="address-title serif">{{ billingProfile.address?.addressTitle || 'Fatura Adresi' }}</h3>
+          </div>
+          <div class="address-actions" role="group" aria-label="Billing address actions">
+            <button class="icon-btn" (click)="openBillingModal()" aria-label="Edit billing address">
+              <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+            </button>
+            <button class="icon-btn danger" (click)="clearBillingAddress()" aria-label="Delete billing address">
+              <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+            </button>
+          </div>
+        </div>
+        <div class="address-lines">
+          <p class="name">{{ billingProfile.accountHolderName }}</p>
+          <p>{{ billingProfile.address?.fullAddress }}</p>
+          <p>{{ billingProfile.address?.city }}{{ billingProfile.address?.zipCode ? ', ' + billingProfile.address?.zipCode : '' }}</p>
+        </div>
+      </article>
+
+      <div class="address-add-card" (click)="openCreateModal()" role="button" tabindex="0" aria-label="Add new address">
+        <div class="address-add-icon"><span class="material-symbols-outlined" aria-hidden="true">location_on</span></div>
+        <div>
+          <h3 class="address-add-title serif">New Location</h3>
+          <p class="address-add-sub">Register a new global destination</p>
+        </div>
+      </div>
+
+      <div *ngIf="!billingProfile" class="address-add-card billing-add-card" (click)="openBillingModal()" role="button" tabindex="0" aria-label="Add billing address">
+        <div class="address-add-icon"><span class="material-symbols-outlined" aria-hidden="true">receipt_long</span></div>
+        <div>
+          <h3 class="address-add-title serif">Fatura Adresi</h3>
+          <p class="address-add-sub">Fatura adresinizi ekleyin</p>
+        </div>
+      </div>
+    </div>
+
+
+
+    <section class="logistics-section">
+      <div>
+        <h4 class="logistics-heading serif">Secure Global Logistics</h4>
+        <p class="logistics-text">Every shipment is handled via bonded couriers with white-glove treatment.</p>
+        <div class="logistics-stats">
+          <div>
+            <p class="logistics-stat-value serif">100%</p>
+            <p class="logistics-stat-label">Insured Delivery</p>
+          </div>
+          <div>
+            <p class="logistics-stat-value serif">180+</p>
+            <p class="logistics-stat-label">Countries Served</p>
+          </div>
+        </div>
+      </div>
+      <div class="logistics-globe">
+        <div class="logistics-globe-inner">
+          <span class="material-symbols-outlined icon-filled logistics-globe-icon">public</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Address Modal -->
+<div *ngIf="showModal" class="modal-overlay" (click)="closeModal()" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <h3 class="modal-title" id="modal-title">{{ editingAddress ? 'Adresi Düzenle' : 'Yeni Adres Ekle' }}</h3>
+      <button class="modal-close" (click)="closeModal()" aria-label="Close dialog">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+    </header>
+
+    <form [formGroup]="addressForm" (ngSubmit)="submitForm()" aria-label="Address form">
+      <div class="modal-body">
+        <!-- Error Message in Modal -->
+        <div *ngIf="errorMessage" class="alert alert-error" role="alert" aria-live="assertive">
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <div class="form-group">
+          <label for="addressTitle" class="form-label">Adres Başlığı</label>
+          <input 
+            #firstInput
+            type="text" 
+            id="addressTitle" 
+            formControlName="addressTitle" 
+            [class.form-input]="true"
+            [class.input-invalid]="isFieldInvalid('addressTitle')"
+            [class.input-valid]="isFieldValid('addressTitle')"
+            placeholder="Örn: Ev, İş, Ofis"
+            [attr.aria-invalid]="isFieldInvalid('addressTitle')"
+            [attr.aria-describedby]="isFieldInvalid('addressTitle') ? 'addressTitle-error' : null"
+          />
+          <div *ngIf="isFieldInvalid('addressTitle')" class="form-error" id="addressTitle-error" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
+            <span>{{ getFieldError('addressTitle') }}</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="fullAddress" class="form-label">Tam Adres *</label>
+          <textarea 
+            id="fullAddress" 
+            formControlName="fullAddress" 
+            [class.form-input]="true"
+            [class.input-invalid]="isFieldInvalid('fullAddress')"
+            [class.input-valid]="isFieldValid('fullAddress')"
+            placeholder="Sokak, mahalle, bina no, daire no"
+            rows="3"
+            aria-required="true"
+            [attr.aria-invalid]="isFieldInvalid('fullAddress')"
+            [attr.aria-describedby]="isFieldInvalid('fullAddress') ? 'fullAddress-error' : null"
+          ></textarea>
+          <div *ngIf="isFieldInvalid('fullAddress')" class="form-error" id="fullAddress-error" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
+            <span>{{ getFieldError('fullAddress') }}</span>
+          </div>
+          <div *ngIf="isFieldValid('fullAddress')" class="form-success" aria-label="Valid input">
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city" class="form-label">Şehir *</label>
+            <input 
+              type="text" 
+              id="city" 
+              formControlName="city" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('city')"
+              [class.input-valid]="isFieldValid('city')"
+              placeholder="Örn: İstanbul"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('city')"
+              [attr.aria-describedby]="isFieldInvalid('city') ? 'city-error' : null"
+            />
+            <div *ngIf="isFieldInvalid('city')" class="form-error" id="city-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('city') }}</span>
+            </div>
+            <div *ngIf="isFieldValid('city')" class="form-success" aria-label="Valid input">
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="zipCode" class="form-label">Posta Kodu</label>
+            <input 
+              type="text" 
+              id="zipCode" 
+              formControlName="zipCode" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('zipCode')"
+              [class.input-valid]="isFieldValid('zipCode')"
+              placeholder="Örn: 34000"
+              [attr.aria-invalid]="isFieldInvalid('zipCode')"
+              [attr.aria-describedby]="isFieldInvalid('zipCode') ? 'zipCode-error' : null"
+            />
+            <div *ngIf="isFieldInvalid('zipCode')" class="form-error" id="zipCode-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('zipCode') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" formControlName="isDefault" aria-label="Set as default address" />
+            <span>Varsayılan adres olarak ayarla</span>
+          </label>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModal()" [disabled]="isLoading" aria-label="Cancel">
+          İptal
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="addressForm.invalid || isLoading" [attr.aria-label]="editingAddress ? 'Update address' : 'Add address'">
+          <span *ngIf="isLoading" class="material-symbols-outlined spinning" aria-hidden="true">progress_activity</span>
+          <span *ngIf="!isLoading">{{ editingAddress ? 'Güncelle' : 'Ekle' }}</span>
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+  <div class="footer-links">
+    <a class="footer-link" href="#">Provenance</a>
+    <a class="footer-link" href="#">Concierge</a>
+    <a class="footer-link" href="#">Legal</a>
+    <a class="footer-link" href="#">Sustainability</a>
+  </div>
+</footer>
+
+<!-- Confirmation Dialog -->
+<app-confirm-dialog
+  [show]="showDeleteConfirm"
+  title="Adresi Sil"
+  message="Bu adresi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+  confirmText="Sil"
+  cancelText="İptal"
+  type="danger"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+></app-confirm-dialog>
+
+<!-- Billing Address Modal -->
+<app-billing-address-modal
+  [show]="showBillingModal"
+  [editingBillingProfile]="billingProfile"
+  (closed)="closeBillingModal()"
+  (billingAddressSet)="onBillingAddressSet($event)"
+></app-billing-address-modal>

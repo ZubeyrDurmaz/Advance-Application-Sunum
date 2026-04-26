@@ -1,0 +1,139 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Admin Panel</h3>
+      <p class="sidebar-subtitle">System Control</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/admin']"><span class="material-symbols-outlined">admin_panel_settings</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/admin/stores']"><span class="material-symbols-outlined">storefront</span><span>Stores</span></a>
+      <a class="nav-link" [routerLink]="['/admin/users']"><span class="material-symbols-outlined">manage_accounts</span><span>Users</span></a>
+      <a class="nav-link" [routerLink]="['/admin/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link active" [routerLink]="['/admin/products']"><span class="material-symbols-outlined">inventory_2</span><span>Products</span></a>
+      <a class="nav-link" [routerLink]="['/admin/discounts']"><span class="material-symbols-outlined">loyalty</span><span>Discounts</span></a>
+      <a class="nav-link" [routerLink]="['/admin/analytics']"><span class="material-symbols-outlined">monitoring</span><span>Analytics</span></a>
+      <a class="nav-link" [routerLink]="['/admin/config']"><span class="material-symbols-outlined">tune</span><span>Config</span></a>
+    </nav>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <span class="section-label">Product Management</span>
+      <h1 class="corp-heading">All Products</h1>
+      <p class="corp-subtext">View, edit, and manage products across all stores on the platform.</p>
+    </header>
+
+    @if (errorMessage) {
+      <p style="color:#e57373;margin-bottom:1rem;">{{ errorMessage }}</p>
+    }
+
+    <!-- Stats -->
+    <div class="inv-stats" style="margin-bottom:2rem;">
+      <div class="inv-stat">
+        <p class="stat-label">Total Products</p>
+        <p class="inv-stat-value serif">{{ products().length }}</p>
+      </div>
+      <div class="inv-stat">
+        <p class="stat-label">In Stock</p>
+        <p class="inv-stat-value serif">{{ products().filter(p => stockStatus(p.stockQuantity) === 'in-stock').length }}</p>
+      </div>
+      <div class="inv-stat inv-stat--warn">
+        <p class="stat-label">Low Stock</p>
+        <p class="inv-stat-value serif">{{ products().filter(p => stockStatus(p.stockQuantity) === 'low-stock').length }}</p>
+      </div>
+      <div class="inv-stat inv-stat--danger">
+        <p class="stat-label">Out of Stock</p>
+        <p class="inv-stat-value serif">{{ products().filter(p => stockStatus(p.stockQuantity) === 'out-of-stock').length }}</p>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="inv-toolbar" style="display: flex; gap: 1rem; align-items: center;">
+      <div class="inv-search-wrap" style="flex: 1;">
+        <span class="material-symbols-outlined inv-search-icon">search</span>
+        <input class="inv-search-input" type="text" placeholder="Search by name, SKU, or store…"
+          [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+      </div>
+      <button class="btn-primary" (click)="downloadCsv()"><span class="material-symbols-outlined">download</span> Download CSV</button>
+    </div>
+
+    @if (loading) {
+      <p style="color:#888;padding:2rem;">Loading products…</p>
+    } @else {
+      <div class="inv-table">
+        <div class="ap-table-head">
+          <span>Product</span>
+          <span>SKU</span>
+          <span>Store</span>
+          <span>Category</span>
+          <span>Price</span>
+          <span>Stock</span>
+          <span></span>
+        </div>
+        @for (p of filtered(); track p.id) {
+          <div class="ap-row">
+            <div>
+              <p class="inv-product-name">{{ p.name }}</p>
+            </div>
+            <span class="inv-ref">{{ p.sku }}</span>
+            <span class="ap-store">{{ p.storeName ?? '—' }}</span>
+            <span class="inv-category">{{ p.categoryName ?? '—' }}</span>
+            <span class="inv-price">{{ formatPrice(p.unitPrice) }}</span>
+            <span class="inv-stock"
+              [class.inv-stock--low]="(p.stockQuantity ?? 0) <= 5 && (p.stockQuantity ?? 0) > 0"
+              [class.inv-stock--zero]="(p.stockQuantity ?? 0) === 0">{{ p.stockQuantity ?? 0 }}</span>
+            <div style="display:flex;gap:0.5rem;">
+              <button class="icon-btn" (click)="openEdit(p)"><span class="material-symbols-outlined">edit</span></button>
+              <button class="icon-btn" style="color:#e57373;" (click)="deleteProduct(p.id)"><span class="material-symbols-outlined">delete</span></button>
+            </div>
+          </div>
+        }
+        @if (!filtered().length) {
+          <div class="inv-empty">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <p>No products match your search.</p>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">&copy; 2024 CHRONOS. All Rights Reserved.</p>
+</footer>
+
+<!-- Edit Modal -->
+@if (editingProduct) {
+  <div class="modal-backdrop" (click)="cancelEdit()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title serif">Edit Product</h3>
+        <button class="modal-close" (click)="cancelEdit()"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <p class="modal-product-name">{{ editingProduct.name }}</p>
+      <p class="modal-product-ref">{{ editingProduct.storeName }}</p>
+      <div class="modal-field">
+        <label class="modal-label">Name</label>
+        <input class="modal-input" type="text" [(ngModel)]="editForm.name" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">SKU</label>
+        <input class="modal-input" type="text" [(ngModel)]="editForm.sku" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Price (USD)</label>
+        <input class="modal-input" type="number" min="0" [(ngModel)]="editForm.unitPrice" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Stock Quantity</label>
+        <input class="modal-input" type="number" min="0" [(ngModel)]="editForm.stockQuantity" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" (click)="submitEdit()">Save Changes</button>
+        <button class="btn-secondary" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </div>
+  </div>
+}

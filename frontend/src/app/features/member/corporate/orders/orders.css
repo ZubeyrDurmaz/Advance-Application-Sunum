@@ -1,0 +1,168 @@
+/* Orders Stats */
+.ord-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+@media (min-width: 768px) { .ord-stats { grid-template-columns: repeat(4, 1fr); } }
+
+.ord-stat { background: var(--surface-low); padding: 1.5rem; border-radius: 0.5rem; }
+.ord-stat-value { font-family: 'Noto Serif', serif; font-size: 1.875rem; color: #1c1c19; }
+
+/* Table columns */
+.ord-table-head {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 2fr 1fr 1.2fr 1fr 0.5fr;
+  padding: 1rem 1.5rem;
+  background: var(--surface-high);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #78716c;
+  font-weight: 700;
+}
+
+.ord-row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 2fr 1fr 1.2fr 1fr 0.5fr;
+  padding: 1.25rem 1.5rem;
+  align-items: center;
+  border-bottom: 1px solid rgba(231,229,220,0.3);
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+.ord-row:last-child { border-bottom: none; }
+.ord-row:hover { background: var(--surface-low); }
+
+/* Status update buttons */
+.ord-status-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.ord-status-btn {
+  padding: 0.5rem 1rem; font-size: 0.75rem; font-family: 'Manrope', sans-serif;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border: 1px solid var(--outline); border-radius: 0.375rem;
+  color: #78716c; background: white; transition: all 0.2s;
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ord-status-btn--active { background: var(--primary); color: white; border-color: var(--primary); font-weight: 700; }
+.ord-status-btn--cancel.ord-status-btn--active { background: #dc2626; border-color: #dc2626; }
+
+/* Hide desktop table on mobile as fallback (template handles primary logic) */
+@media (max-width: 767px) {
+  .inv-table {
+    display: none;
+  }
+}
+
+/* ── Mobile Card Layout ── */
+.ord-table-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Hide mobile cards on desktop as fallback (template handles primary logic) */
+@media (min-width: 768px) {
+  .ord-table-cards {
+    display: none;
+  }
+}
+
+.ord-card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(28,28,25,0.08);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.ord-card:active {
+  transform: scale(0.98);
+}
+
+.ord-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(240,237,232,0.5);
+}
+
+.ord-card-header .ord-order-id {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1c1c19;
+  margin-bottom: 0.25rem;
+  font-family: 'Manrope', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.ord-card-header .ord-customer-name {
+  font-size: 0.875rem;
+  color: #78716c;
+  font-weight: 500;
+}
+
+.ord-card-header .icon-btn {
+  flex-shrink: 0;
+}
+
+.ord-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ord-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ord-card-label {
+  font-size: 0.75rem; /* 12px - acceptable for labels/metadata */
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #78716c;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.ord-card-value {
+  font-size: 0.875rem;
+  color: #1c1c19;
+  font-weight: 500;
+  text-align: right;
+}
+
+/* Ensure icon buttons meet touch target size */
+.icon-btn {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #78716c;
+  transition: color 0.2s, background-color 0.2s;
+  border-radius: 0.375rem;
+}
+
+.icon-btn:hover {
+  color: #1c1c19;
+  background-color: var(--surface-container);
+}
+
+.icon-btn:active {
+  background-color: var(--surface-high);
+}
+
+.icon-btn .material-symbols-outlined {
+  font-size: 1.25rem;
+}

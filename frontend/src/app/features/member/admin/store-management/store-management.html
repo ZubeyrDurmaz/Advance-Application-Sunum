@@ -1,0 +1,102 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Admin Panel</h3>
+      <p class="sidebar-subtitle">System Control</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/admin']"><span class="material-symbols-outlined">admin_panel_settings</span><span>Dashboard</span></a>
+      <a class="nav-link active" [routerLink]="['/admin/stores']"><span class="material-symbols-outlined">storefront</span><span>Stores</span></a>
+      <a class="nav-link" [routerLink]="['/admin/users']"><span class="material-symbols-outlined">manage_accounts</span><span>Users</span></a>
+      <a class="nav-link" [routerLink]="['/admin/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link" [routerLink]="['/admin/products']"><span class="material-symbols-outlined">inventory_2</span><span>Products</span></a>
+      <a class="nav-link" [routerLink]="['/admin/discounts']"><span class="material-symbols-outlined">loyalty</span><span>Discounts</span></a>
+      <a class="nav-link" [routerLink]="['/admin/analytics']"><span class="material-symbols-outlined">monitoring</span><span>Analytics</span></a>
+      <a class="nav-link" [routerLink]="['/admin/config']"><span class="material-symbols-outlined">tune</span><span>Config</span></a>
+    </nav>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <span class="section-label">Store Management</span>
+      <h1 class="corp-heading">Stores</h1>
+      <p class="corp-subtext">Open or close stores. Monitor revenue and order performance per location.</p>
+    </header>
+
+    @if (errorMessage) {
+      <p style="color:#e57373;margin-bottom:1rem;">{{ errorMessage }}</p>
+    }
+
+    <!-- Search -->
+    <div class="inv-toolbar">
+      <div class="inv-search-wrap">
+        <span class="material-symbols-outlined inv-search-icon">search</span>
+        <input class="inv-search-input" type="text" placeholder="Search stores…"
+          [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="inv-stats" style="margin-bottom:2rem;">
+      <div class="inv-stat">
+        <p class="stat-label">Total Stores</p>
+        <p class="inv-stat-value serif">{{ stores().length }}</p>
+      </div>
+      <div class="inv-stat">
+        <p class="stat-label">Open</p>
+        <p class="inv-stat-value serif">{{ stores().filter(s => s.status === 'OPEN').length }}</p>
+      </div>
+      <div class="inv-stat inv-stat--warn">
+        <p class="stat-label">Closed</p>
+        <p class="inv-stat-value serif">{{ stores().filter(s => s.status !== 'OPEN').length }}</p>
+      </div>
+    </div>
+
+    @if (loading) {
+      <p style="color:#888;padding:2rem;">Loading stores…</p>
+    } @else {
+      <div class="store-grid">
+        @for (s of filtered(); track s.id) {
+          <div class="store-card" [class.store-card--closed]="s.status !== 'OPEN'">
+            <div class="store-card-header">
+              <div>
+                <h3 class="store-name serif">{{ s.name }}</h3>
+                <p class="store-location">{{ s.ownerName }} · {{ s.ownerEmail }}</p>
+              </div>
+              <span class="store-status store-status--{{ s.status | lowercase }}">{{ s.status }}</span>
+            </div>
+            <div class="store-meta">
+              <div>
+                <p class="stat-label">Products</p>
+                <p class="store-meta-value">{{ s.productCount }}</p>
+              </div>
+              <div>
+                <p class="stat-label">Revenue</p>
+                <p class="store-meta-value">{{ formatPrice(s.totalRevenue) }}</p>
+              </div>
+              <div>
+                <p class="stat-label">Orders</p>
+                <p class="store-meta-value">{{ s.orderCount }}</p>
+              </div>
+            </div>
+            <div class="store-actions">
+              <button class="store-toggle-btn" [class.store-toggle-btn--open]="s.status === 'OPEN'"
+                (click)="updateStatus(s.id, s.status === 'OPEN' ? 'CLOSED' : 'OPEN')">
+                <span class="material-symbols-outlined">{{ s.status === 'OPEN' ? 'lock' : 'lock_open' }}</span>
+                {{ s.status === 'OPEN' ? 'Close Store' : 'Open Store' }}
+              </button>
+            </div>
+          </div>
+        }
+        @if (!filtered().length) {
+          <p style="color:#888;padding:1rem;">No stores found.</p>
+        }
+      </div>
+    }
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+</footer>

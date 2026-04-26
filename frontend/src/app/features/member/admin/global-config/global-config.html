@@ -1,0 +1,192 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Admin Panel</h3>
+      <p class="sidebar-subtitle">System Control</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/admin']"><span class="material-symbols-outlined">admin_panel_settings</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/admin/stores']"><span class="material-symbols-outlined">storefront</span><span>Stores</span></a>
+      <a class="nav-link" [routerLink]="['/admin/users']"><span class="material-symbols-outlined">manage_accounts</span><span>Users</span></a>
+      <a class="nav-link" [routerLink]="['/admin/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link" [routerLink]="['/admin/products']"><span class="material-symbols-outlined">inventory_2</span><span>Products</span></a>
+      <a class="nav-link" [routerLink]="['/admin/discounts']"><span class="material-symbols-outlined">loyalty</span><span>Discounts</span></a>
+      <a class="nav-link" [routerLink]="['/admin/analytics']"><span class="material-symbols-outlined">monitoring</span><span>Analytics</span></a>
+      <a class="nav-link active" [routerLink]="['/admin/config']"><span class="material-symbols-outlined icon-filled">tune</span><span>Config</span></a>
+    </nav>
+    <div class="sidebar-concierge">
+      <p class="sidebar-concierge-label">System Status</p>
+      <p class="sidebar-concierge-text">All systems operational.</p>
+      <button class="btn-concierge">View Logs</button>
+    </div>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <span class="section-label">Global Configuration</span>
+      <h1 class="corp-heading">Platform Config</h1>
+      <p class="corp-subtext">Configure platform-wide settings including payment rules, security policies and system behaviour.</p>
+    </header>
+
+    <div class="cs-grid">
+      <!-- Platform -->
+      <section>
+        <h3 class="settings-section-title serif">Platform</h3>
+        <div class="settings-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">Platform Name</label>
+              <input class="form-input" type="text" [(ngModel)]="platform.name" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Support Email</label>
+              <input class="form-input" type="email" [(ngModel)]="platform.supportEmail" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">Default Currency</label>
+              <input class="form-input" type="text" [(ngModel)]="platform.defaultCurrency" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Default Language</label>
+              <input class="form-input" type="text" [(ngModel)]="platform.defaultLanguage" />
+            </div>
+          </div>
+          <div class="cs-toggles">
+            <div class="cs-toggle-row">
+              <div>
+                <p class="cs-toggle-label">Maintenance Mode</p>
+                <p class="cs-toggle-sub">Disable public access to the platform</p>
+              </div>
+              <button class="cs-toggle" [class.cs-toggle--on]="platform.maintenanceMode" (click)="platform.maintenanceMode = !platform.maintenanceMode">
+                <span class="cs-toggle-knob"></span>
+              </button>
+            </div>
+            <div class="cs-toggle-row">
+              <div>
+                <p class="cs-toggle-label">Open Registration</p>
+                <p class="cs-toggle-sub">Allow new users to register</p>
+              </div>
+              <button class="cs-toggle" [class.cs-toggle--on]="platform.registrationOpen" (click)="platform.registrationOpen = !platform.registrationOpen">
+                <span class="cs-toggle-knob"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Payments -->
+      <section>
+        <h3 class="settings-section-title serif">Payments</h3>
+        <div class="settings-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">Tax Rate (%)</label>
+              <input class="form-input" type="number" [(ngModel)]="payments.taxRate" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Invoice Prefix</label>
+              <input class="form-input" type="text" [(ngModel)]="payments.invoicePrefix" />
+            </div>
+          </div>
+          <div class="cs-toggles">
+            <div class="cs-toggle-row">
+              <div>
+                <p class="cs-toggle-label">Stripe Payments</p>
+                <p class="cs-toggle-sub">Enable card payment processing</p>
+              </div>
+              <button class="cs-toggle" [class.cs-toggle--on]="payments.stripeEnabled" (click)="payments.stripeEnabled = !payments.stripeEnabled">
+                <span class="cs-toggle-knob"></span>
+              </button>
+            </div>
+            <div class="cs-toggle-row">
+              <div>
+                <p class="cs-toggle-label">Crypto Payments</p>
+                <p class="cs-toggle-sub">Enable blockchain settlement</p>
+              </div>
+              <button class="cs-toggle" [class.cs-toggle--on]="payments.cryptoEnabled" (click)="payments.cryptoEnabled = !payments.cryptoEnabled">
+                <span class="cs-toggle-knob"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Security -->
+      <section>
+        <h3 class="settings-section-title serif">Security</h3>
+        <div class="settings-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">Session Timeout (min)</label>
+              <input class="form-input" type="number" [(ngModel)]="security.sessionTimeout" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Max Login Attempts</label>
+              <input class="form-input" type="number" [(ngModel)]="security.maxLoginAttempts" />
+            </div>
+          </div>
+          <div class="cs-toggles">
+            <div class="cs-toggle-row">
+              <div><p class="cs-toggle-label">Email Verification</p><p class="cs-toggle-sub">Require email verification on signup</p></div>
+              <button class="cs-toggle" [class.cs-toggle--on]="security.requireEmailVerification" (click)="security.requireEmailVerification = !security.requireEmailVerification"><span class="cs-toggle-knob"></span></button>
+            </div>
+            <div class="cs-toggle-row">
+              <div><p class="cs-toggle-label">2FA for Admins</p><p class="cs-toggle-sub">Require 2FA for all admin accounts</p></div>
+              <button class="cs-toggle" [class.cs-toggle--on]="security.twoFactorForAdmin" (click)="security.twoFactorForAdmin = !security.twoFactorForAdmin"><span class="cs-toggle-knob"></span></button>
+            </div>
+            <div class="cs-toggle-row">
+              <div><p class="cs-toggle-label">Audit Logging</p><p class="cs-toggle-sub">Log all admin actions</p></div>
+              <button class="cs-toggle" [class.cs-toggle--on]="security.auditLogging" (click)="security.auditLogging = !security.auditLogging"><span class="cs-toggle-knob"></span></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notifications -->
+      <section>
+        <h3 class="settings-section-title serif">System Notifications</h3>
+        <div class="cs-toggles">
+          <div class="cs-toggle-row">
+            <div><p class="cs-toggle-label">System Alerts</p><p class="cs-toggle-sub">Critical system error notifications</p></div>
+            <button class="cs-toggle" [class.cs-toggle--on]="notifications.systemAlerts" (click)="notifications.systemAlerts = !notifications.systemAlerts"><span class="cs-toggle-knob"></span></button>
+          </div>
+          <div class="cs-toggle-row">
+            <div><p class="cs-toggle-label">Error Alerts</p><p class="cs-toggle-sub">Platform error notifications</p></div>
+            <button class="cs-toggle" [class.cs-toggle--on]="notifications.errorAlerts" (click)="notifications.errorAlerts = !notifications.errorAlerts"><span class="cs-toggle-knob"></span></button>
+          </div>
+          <div class="cs-toggle-row">
+            <div><p class="cs-toggle-label">Daily Report</p><p class="cs-toggle-sub">Daily platform summary</p></div>
+            <button class="cs-toggle" [class.cs-toggle--on]="notifications.dailyReport" (click)="notifications.dailyReport = !notifications.dailyReport"><span class="cs-toggle-knob"></span></button>
+          </div>
+          <div class="cs-toggle-row">
+            <div><p class="cs-toggle-label">Weekly Report</p><p class="cs-toggle-sub">Weekly performance digest</p></div>
+            <button class="cs-toggle" [class.cs-toggle--on]="notifications.weeklyReport" (click)="notifications.weeklyReport = !notifications.weeklyReport"><span class="cs-toggle-knob"></span></button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="settings-actions">
+      <button class="btn-save" (click)="save()">Save Configuration</button>
+    </div>
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+  <div class="footer-links">
+    <a class="footer-link" href="#">Privacy</a>
+    <a class="footer-link" href="#">Terms</a>
+    <a class="footer-link" href="#">Support</a>
+  </div>
+</footer>
+
+@if (saved()) {
+  <div class="review-toast">
+    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24;">check_circle</span>
+    Configuration saved successfully
+  </div>
+}

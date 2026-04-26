@@ -1,0 +1,298 @@
+<app-navbar />
+
+<main class="collection-page">
+  <section class="collection-hero">
+    <h1 class="collection-title">The Heritage Vault</h1>
+    <div class="tab-toggle">
+      <button class="tab-btn"
+        [class.tab-btn--active]="activeTab === 'collections'"
+        [class.tab-btn--inactive]="activeTab !== 'collections'"
+        (click)="activeTab = 'collections'">Featured Collections</button>
+      <button class="tab-btn"
+        [class.tab-btn--active]="activeTab === 'all'"
+        [class.tab-btn--inactive]="activeTab !== 'all'"
+        (click)="activeTab = 'all'">Explore All</button>
+    </div>
+  </section>
+
+  @if (activeTab === 'collections') {
+    <section class="brands-section">
+      <div class="brands-grid">
+        @for (col of featuredCollections; track col.categoryName) {
+          <div class="brand-card" [class.brand-card--offset]="col.offset" (click)="exploreCollection(col.categoryName)">
+            <img class="brand-card-img" appLazyLoad [src]="col.image" [alt]="col.categoryName" />
+            <div class="brand-card-overlay">
+              <div class="brand-card-info">
+                <span class="material-symbols-outlined brand-icon">{{ col.icon }}</span>
+                <h3 class="brand-name">{{ col.categoryName }}</h3>
+                <p class="brand-tagline">{{ col.tagline }}</p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  @if (activeTab === 'all') {
+    <section class="explore-section">
+      <div class="search-wrap">
+        <div class="search-bar">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input class="search-input"
+            placeholder="Search by model, reference, or complication..."
+            type="text" [value]="searchQuery()" (input)="onSearchChange($any($event.target).value)" />
+        </div>
+      </div>
+
+      <div class="explore-layout">
+        <!-- Mobile filter toggle button -->
+        @if (isMobile) {
+          <button class="filter-toggle-btn" (click)="toggleFilterPanel()">
+            <span class="material-symbols-outlined">tune</span>
+            <span>Filters</span>
+            @if (activeFilterCount > 0) {
+              <span class="filter-badge">{{ activeFilterCount }}</span>
+            }
+          </button>
+        }
+
+        <!-- Filter sidebar/panel -->
+        <aside class="filter-sidebar"
+          [class.filter-sidebar--mobile-open]="filterPanelOpen()"
+          [class.filter-sidebar--mobile-closed]="!filterPanelOpen()">
+          
+          <!-- Mobile close button -->
+          @if (isMobile) {
+            <div class="filter-panel-header">
+              <h3 class="filter-panel-title">Filters</h3>
+              <button class="filter-close-btn" (click)="toggleFilterPanel()">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+          }
+
+          @if (hasActiveFilters) {
+            <button class="clear-filters-btn" (click)="clearFilters()">Clear all filters</button>
+          }
+
+          <!-- Sort -->
+          <div>
+            <h4 class="filter-group-label">Sort By</h4>
+            <div class="filter-options">
+              <label class="filter-option" (click)="sortBy.set('name-asc')">
+                <div class="filter-checkbox"
+                  [class.filter-checkbox--checked]="sortBy() === 'name-asc'"
+                  [class.filter-checkbox--unchecked]="sortBy() !== 'name-asc'">
+                  @if (sortBy() === 'name-asc') {
+                    <span class="material-symbols-outlined filter-check-icon">check</span>
+                  }
+                </div>
+                <span class="filter-option-label"
+                  [class.filter-option-label--active]="sortBy() === 'name-asc'"
+                  [class.filter-option-label--inactive]="sortBy() !== 'name-asc'">Name A–Z</span>
+              </label>
+              <label class="filter-option" (click)="sortBy.set('name-desc')">
+                <div class="filter-checkbox"
+                  [class.filter-checkbox--checked]="sortBy() === 'name-desc'"
+                  [class.filter-checkbox--unchecked]="sortBy() !== 'name-desc'">
+                  @if (sortBy() === 'name-desc') {
+                    <span class="material-symbols-outlined filter-check-icon">check</span>
+                  }
+                </div>
+                <span class="filter-option-label"
+                  [class.filter-option-label--active]="sortBy() === 'name-desc'"
+                  [class.filter-option-label--inactive]="sortBy() !== 'name-desc'">Name Z–A</span>
+              </label>
+              <label class="filter-option" (click)="sortBy.set('price-asc')">
+                <div class="filter-checkbox"
+                  [class.filter-checkbox--checked]="sortBy() === 'price-asc'"
+                  [class.filter-checkbox--unchecked]="sortBy() !== 'price-asc'">
+                  @if (sortBy() === 'price-asc') {
+                    <span class="material-symbols-outlined filter-check-icon">check</span>
+                  }
+                </div>
+                <span class="filter-option-label"
+                  [class.filter-option-label--active]="sortBy() === 'price-asc'"
+                  [class.filter-option-label--inactive]="sortBy() !== 'price-asc'">Price: Low to High</span>
+              </label>
+              <label class="filter-option" (click)="sortBy.set('price-desc')">
+                <div class="filter-checkbox"
+                  [class.filter-checkbox--checked]="sortBy() === 'price-desc'"
+                  [class.filter-checkbox--unchecked]="sortBy() !== 'price-desc'">
+                  @if (sortBy() === 'price-desc') {
+                    <span class="material-symbols-outlined filter-check-icon">check</span>
+                  }
+                </div>
+                <span class="filter-option-label"
+                  [class.filter-option-label--active]="sortBy() === 'price-desc'"
+                  [class.filter-option-label--inactive]="sortBy() !== 'price-desc'">Price: High to Low</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Category filter from backend -->
+          @if (categories().length > 0) {
+            <div>
+              <h4 class="filter-group-label">Category</h4>
+              <div class="filter-options">
+                <label class="filter-option" (click)="selectCategory(null)">
+                  <div class="filter-checkbox"
+                    [class.filter-checkbox--checked]="selectedCategoryId() === null"
+                    [class.filter-checkbox--unchecked]="selectedCategoryId() !== null">
+                    @if (selectedCategoryId() === null) {
+                      <span class="material-symbols-outlined filter-check-icon">check</span>
+                    }
+                  </div>
+                  <span class="filter-option-label"
+                    [class.filter-option-label--active]="selectedCategoryId() === null"
+                    [class.filter-option-label--inactive]="selectedCategoryId() !== null">All Categories</span>
+                </label>
+                @for (cat of categories(); track cat.id) {
+                  <label class="filter-option" (click)="selectCategory(cat.id)">
+                    <div class="filter-checkbox"
+                      [class.filter-checkbox--checked]="selectedCategoryId() === cat.id"
+                      [class.filter-checkbox--unchecked]="selectedCategoryId() !== cat.id">
+                      @if (selectedCategoryId() === cat.id) {
+                        <span class="material-symbols-outlined filter-check-icon">check</span>
+                      }
+                    </div>
+                    <span class="filter-option-label"
+                      [class.filter-option-label--active]="selectedCategoryId() === cat.id"
+                      [class.filter-option-label--inactive]="selectedCategoryId() !== cat.id">{{ cat.name }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Price Range filter -->
+          <div>
+            <h4 class="filter-group-label">Price Range</h4>
+            <div class="filter-options">
+              @for (range of priceRanges; track range.label) {
+                <label class="filter-option" (click)="selectPriceRange(range.label)">
+                  <div class="filter-checkbox"
+                    [class.filter-checkbox--checked]="selectedPriceRange() === range.label"
+                    [class.filter-checkbox--unchecked]="selectedPriceRange() !== range.label">
+                    @if (selectedPriceRange() === range.label) {
+                      <span class="material-symbols-outlined filter-check-icon">check</span>
+                    }
+                  </div>
+                  <span class="filter-option-label"
+                    [class.filter-option-label--active]="selectedPriceRange() === range.label"
+                    [class.filter-option-label--inactive]="selectedPriceRange() !== range.label">{{ range.label }}</span>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Availability filter -->
+          <div>
+            <h4 class="filter-group-label">Availability</h4>
+            <div class="filter-options">
+              <label class="filter-option" (click)="selectStock(null)">
+                <div class="filter-checkbox"
+                  [class.filter-checkbox--checked]="selectedStock() === null"
+                  [class.filter-checkbox--unchecked]="selectedStock() !== null">
+                  @if (selectedStock() === null) {
+                    <span class="material-symbols-outlined filter-check-icon">check</span>
+                  }
+                </div>
+                <span class="filter-option-label"
+                  [class.filter-option-label--active]="selectedStock() === null"
+                  [class.filter-option-label--inactive]="selectedStock() !== null">All</span>
+              </label>
+              <label class="filter-option" (click)="selectStock('in-stock')">
+                <div class="filter-checkbox"
+                  [class.filter-checkbox--checked]="selectedStock() === 'in-stock'"
+                  [class.filter-checkbox--unchecked]="selectedStock() !== 'in-stock'">
+                  @if (selectedStock() === 'in-stock') {
+                    <span class="material-symbols-outlined filter-check-icon">check</span>
+                  }
+                </div>
+                <span class="filter-option-label"
+                  [class.filter-option-label--active]="selectedStock() === 'in-stock'"
+                  [class.filter-option-label--inactive]="selectedStock() !== 'in-stock'">In Stock</span>
+              </label>
+              <label class="filter-option" (click)="selectStock('out-of-stock')">
+                <div class="filter-checkbox"
+                  [class.filter-checkbox--checked]="selectedStock() === 'out-of-stock'"
+                  [class.filter-checkbox--unchecked]="selectedStock() !== 'out-of-stock'">
+                  @if (selectedStock() === 'out-of-stock') {
+                    <span class="material-symbols-outlined filter-check-icon">check</span>
+                  }
+                </div>
+                <span class="filter-option-label"
+                  [class.filter-option-label--active]="selectedStock() === 'out-of-stock'"
+                  [class.filter-option-label--inactive]="selectedStock() !== 'out-of-stock'">Out of Stock</span>
+              </label>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Overlay backdrop for mobile -->
+        @if (isMobile && filterPanelOpen()) {
+          <div class="filter-overlay" (click)="toggleFilterPanel()"></div>
+        }
+
+        <div class="explore-results">
+          <div class="results-header">
+            <p class="results-count">{{ filteredProducts().length }} {{ filteredProducts().length === 1 ? 'piece' : 'pieces' }} found</p>
+          </div>
+
+          @if (filteredProducts().length === 0) {
+            <div class="empty-state">
+              <span class="material-symbols-outlined empty-state-icon">search_off</span>
+              <p class="empty-state-title">No pieces match your criteria</p>
+              <p class="empty-state-sub">Try adjusting your filters or search term.</p>
+              <button class="clear-filters-btn" (click)="clearFilters()">Clear filters</button>
+            </div>
+          } @else {
+            <div class="product-grid collection-product-grid">
+              @for (product of filteredProducts(); track product.id) {
+                <div class="product-card" [routerLink]="['/product', product.slug]">
+                  <div class="product-image-wrap">
+                    <img class="product-image" appLazyLoad [src]="product.image" [alt]="product.name" />
+                    <div class="product-cart-btn">
+                      <span class="material-symbols-outlined product-cart-icon">add_shopping_cart</span>
+                    </div>
+                  </div>
+                  <h3 class="product-name">{{ product.name }}</h3>
+                  <p class="product-subtitle">{{ product.subtitle }}</p>
+                  <p class="product-price">{{ product.price }}</p>
+                </div>
+              }
+            </div>
+
+            <!-- Pagination controls -->
+            @if (totalPages() > 1) {
+              <nav class="pagination">
+                <button class="pagination-btn"
+                  [disabled]="currentPage() === 0"
+                  (click)="goToPage(currentPage() - 1)">
+                  <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+
+                @for (page of pageNumbers; track page) {
+                  <button class="pagination-btn"
+                    [class.pagination-btn--active]="page === currentPage()"
+                    (click)="goToPage(page)">{{ page + 1 }}</button>
+                }
+
+                <button class="pagination-btn"
+                  [disabled]="currentPage() === totalPages() - 1"
+                  (click)="goToPage(currentPage() + 1)">
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+              </nav>
+              <p class="pagination-meta">{{ totalElements() }} pieces total · Page {{ currentPage() + 1 }} of {{ totalPages() }}</p>
+            }
+          }
+        </div>
+      </div>
+    </section>
+  }
+</main>
+
+<app-footer />

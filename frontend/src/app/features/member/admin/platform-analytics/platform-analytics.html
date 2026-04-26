@@ -1,0 +1,103 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Admin Panel</h3>
+      <p class="sidebar-subtitle">System Control</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/admin']"><span class="material-symbols-outlined">admin_panel_settings</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/admin/stores']"><span class="material-symbols-outlined">storefront</span><span>Stores</span></a>
+      <a class="nav-link" [routerLink]="['/admin/users']"><span class="material-symbols-outlined">manage_accounts</span><span>Users</span></a>
+      <a class="nav-link" [routerLink]="['/admin/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link" [routerLink]="['/admin/products']"><span class="material-symbols-outlined">inventory_2</span><span>Products</span></a>
+      <a class="nav-link" [routerLink]="['/admin/discounts']"><span class="material-symbols-outlined">loyalty</span><span>Discounts</span></a>
+      <a class="nav-link active" [routerLink]="['/admin/analytics']"><span class="material-symbols-outlined">monitoring</span><span>Analytics</span></a>
+      <a class="nav-link" [routerLink]="['/admin/config']"><span class="material-symbols-outlined">tune</span><span>Config</span></a>
+    </nav>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <span class="section-label">Platform Intelligence</span>
+      <h1 class="corp-heading">Platform Analytics</h1>
+      <p class="corp-subtext">Cross-store revenue, user growth and platform-wide performance metrics.</p>
+    </header>
+
+    @if (loading) {
+      <p style="color:#888;padding:2rem;">Loading analytics…</p>
+    } @else if (errorMessage) {
+      <p style="color:#e57373;padding:2rem;">{{ errorMessage }}</p>
+    } @else if (data) {
+
+      <!-- KPI Cards -->
+      <div class="an-kpis">
+        <div class="kpi-card">
+          <p class="stat-label">Total Users</p>
+          <p class="kpi-value serif">{{ data.totalUsers }}</p>
+        </div>
+        <div class="kpi-card">
+          <p class="stat-label">Total Stores</p>
+          <p class="kpi-value serif">{{ data.totalStores }}</p>
+        </div>
+        <div class="kpi-card">
+          <p class="stat-label">Total Orders</p>
+          <p class="kpi-value serif">{{ data.totalOrders }}</p>
+        </div>
+        <div class="kpi-card">
+          <p class="stat-label">Total Revenue</p>
+          <p class="kpi-value serif">{{ formatPrice(data.totalRevenue) }}</p>
+        </div>
+      </div>
+
+      <!-- Monthly Revenue Chart -->
+      @if (data.monthlyRevenue?.length) {
+        <div class="analytics-chart-card" style="margin-top:2rem;">
+          <h3 class="analytics-chart-title">Monthly Revenue</h3>
+          <div class="an-bar-chart">
+            @for (m of data.monthlyRevenue; track m.month) {
+              <div class="an-bar-col">
+                <span class="an-bar-value">{{ m.revenue > 0 ? formatPrice(m.revenue) : '' }}</span>
+                <div class="an-bar-wrap"><div class="an-bar" [style.height]="getBarHeight(m.revenue)"></div></div>
+                <span class="monthly-bar-label">{{ m.month }}</span>
+                <span class="an-bar-orders">{{ m.orders > 0 ? m.orders + ' orders' : '' }}</span>
+              </div>
+            }
+          </div>
+          <div style="margin-top:1rem;">
+            @for (m of data.monthlyRevenue; track m.month) {
+              <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #222;font-size:0.875rem;">
+                <span style="color:#888;">{{ m.month }}</span>
+                <span style="color:#f0f0f0;">{{ formatPrice(m.revenue) }}</span>
+                <span style="color:#888;">{{ m.orders }} orders</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Top Stores -->
+      @if (data.topStores?.length) {
+        <div class="analytics-chart-card" style="margin-top:2rem;margin-bottom:2rem;">
+          <h3 class="analytics-chart-title">Top Stores by Revenue</h3>
+          <div class="an-products">
+            @for (s of data.topStores; track s.name) {
+              <div class="an-product-row">
+                <div>
+                  <p class="inv-product-name">{{ s.name }}</p>
+                </div>
+                <div><span class="inv-product-brand">{{ s.orders }} orders</span></div>
+                <div class="an-product-meta"><span class="ord-amount">{{ formatPrice(s.revenue) }}</span></div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+    }
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+</footer>

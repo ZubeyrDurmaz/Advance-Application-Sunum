@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Touch-Friendly Interaction Styles Demo - CHRONOS</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .demo-section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .demo-title {
+      font-family: 'Noto Serif', serif;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--on-surface);
+    }
+    
+    .demo-description {
+      font-size: 0.875rem;
+      color: var(--on-surface-variant);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .size-indicator {
+      font-size: 0.75rem;
+      color: var(--stone-400);
+      margin-top: 0.5rem;
+      font-family: monospace;
+    }
+    
+    .touch-target-visual {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .touch-target-visual::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 2px dashed var(--primary);
+      border-radius: 0.25rem;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+    
+    .device-info {
+      background: var(--primary-light);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+      font-size: 0.875rem;
+    }
+    
+    .device-info strong {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <h1 style="font-family: 'Noto Serif', serif; margin-bottom: 0.5rem;">Touch-Friendly Interaction Styles Demo</h1>
+  <p style="color: var(--on-surface-variant); margin-bottom: 2rem;">
+    This page demonstrates the touch-friendly interaction styles implemented for the CHRONOS application.
+    All interactive elements meet the minimum 44x44px touch target size on mobile devices.
+  </p>
+  
+  <div class="device-info">
+    <strong>Testing Instructions:</strong> Open this page on a mobile device or use Chrome DevTools device emulation.
+    On touch devices, hover effects are removed and active states (scale transform) are applied on press.
+    The dashed borders show the minimum touch target areas.
+  </div>
+
+  <!-- Button Touch Targets -->
+  <div class="demo-section">
+    <h2 class="demo-title">Button Touch Targets (Requirement 12.1)</h2>
+    <p class="demo-description">
+      All buttons meet the minimum 44x44px touch target size. On touch devices, buttons scale down slightly when pressed.
+    </p>
+    <div class="button-group">
+      <div class="touch-target-visual">
+        <button class="btn-primary">Primary Button</button>
+        <div class="size-indicator">min-height: 44px</div>
+      </div>
+      <div class="touch-target-visual">
+        <button class="btn-secondary">
+          <span class="material-symbols-outlined">add</span>
+          Secondary Button
+        </button>
+        <div class="size-indicator">min-height: 44px</div>
+      </div>
+      <div class="touch-target-visual">
+        <button class="btn-ghost">
+          <span class="material-symbols-outlined">arrow_forward</span>
+          Ghost Button
+        </button>
+        <div class="size-indicator">min-height: 44px</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Icon Button Touch Targets -->
+  <div class="demo-section">
+    <h2 class="demo-title">Icon Button Touch Targets (Requirement 12.7)</h2>
+    <p class="demo-description">
+      Icon buttons ensure visible tap area meets minimum size even if the icon itself is smaller.
+    </p>
+    <div class="button-group">
+      <div class="touch-target-visual">
+        <button class="icon-btn">
+          <span class="material-symbols-outlined">favorite</span>
+        </button>
+        <div class="size-indicator">44x44px</div>
+      </div>
+      <div class="touch-target-visual">
+        <button class="icon-btn">
+          <span class="material-symbols-outlined">shopping_cart</span>
+        </button>
+        <div class="size-indicator">44x44px</div>
+      </div>
+      <div class="touch-target-visual">
+        <button class="icon-btn">
+          <span class="material-symbols-outlined">search</span>
+        </button>
+        <div class="size-indicator">44x44px</div>
+      </div>
+      <div class="touch-target-visual">
+        <button class="icon-btn danger">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+        <div class="size-indicator">44x44px</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Touch Targets -->
+  <div class="demo-section">
+    <h2 class="demo-title">Link Touch Targets (Requirement 12.2)</h2>
+    <p class="demo-description">
+      Links have adequate padding to meet minimum touch target size. On touch devices, links show opacity change on press.
+    </p>
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      <div class="touch-target-visual">
+        <a href="#" class="nav-link">
+          <span class="material-symbols-outlined">home</span>
+          Navigation Link
+        </a>
+        <div class="size-indicator">min-height: 44px</div>
+      </div>
+      <div class="touch-target-visual">
+        <a href="#" class="footer-link">Footer Link</a>
+        <div class="size-indicator">min-height: 44px</div>
+      </div>
+      <div class="touch-target-visual">
+        <a href="#" class="card-cta">
+          View Details
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+        <div class="size-indicator">min-height: 44px</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Touch Spacing -->
+  <div class="demo-section">
+    <h2 class="demo-title">Touch Spacing Utilities (Requirement 12.3)</h2>
+    <p class="demo-description">
+      Minimum 8px spacing between adjacent touch targets to prevent accidental taps.
+    </p>
+    
+    <h3 style="font-size: 1rem; margin-bottom: 1rem; margin-top: 2rem;">Button Group with Touch Spacing</h3>
+    <div class="button-group">
+      <button class="btn-secondary">Option 1</button>
+      <button class="btn-secondary">Option 2</button>
+      <button class="btn-secondary">Option 3</button>
+      <button class="btn-secondary">Option 4</button>
+    </div>
+    <div class="size-indicator">gap: 8px (--touch-spacing-min)</div>
+    
+    <h3 style="font-size: 1rem; margin-bottom: 1rem; margin-top: 2rem;">Touch List</h3>
+    <div class="touch-list" style="max-width: 300px;">
+      <a href="#" class="nav-link">Dashboard</a>
+      <a href="#" class="nav-link">Addresses</a>
+      <a href="#" class="nav-link">Payments</a>
+      <a href="#" class="nav-link">Order History</a>
+    </div>
+    <div class="size-indicator">margin-top: 8px between items</div>
+  </div>
+
+  <!-- Form Input Touch Targets -->
+  <div class="demo-section">
+    <h2 class="demo-title">Form Input Touch Targets (Requirement 7.1)</h2>
+    <p class="demo-description">
+      All form inputs meet minimum 44px height on mobile for easy interaction.
+    </p>
+    <div style="max-width: 400px;">
+      <div class="form-field" style="margin-bottom: 1rem;">
+        <label class="form-label">Email Address</label>
+        <div class="touch-target-visual">
+          <input type="email" class="form-input" placeholder="your@email.com">
+          <div class="size-indicator">min-height: 44px on mobile</div>
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Message</label>
+        <div class="touch-target-visual">
+          <textarea class="form-input" rows="3" placeholder="Your message"></textarea>
+          <div class="size-indicator">min-height: 44px on mobile</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Touch Device Behavior -->
+  <div class="demo-section">
+    <h2 class="demo-title">Touch Device Behavior (Requirements 12.4, 12.5)</h2>
+    <p class="demo-description">
+      On touch devices (hover: none), hover effects are removed and active states provide visual feedback.
+      Try pressing and holding the buttons below on a touch device.
+    </p>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+      <div>
+        <h3 style="font-size: 0.875rem; margin-bottom: 1rem; color: var(--on-surface-variant);">
+          Desktop (hover: hover)
+        </h3>
+        <ul style="font-size: 0.875rem; line-height: 1.8; color: var(--on-surface-variant);">
+          <li>Hover effects active</li>
+          <li>Opacity changes on hover</li>
+          <li>Background changes on hover</li>
+          <li>Transform effects on hover</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size: 0.875rem; margin-bottom: 1rem; color: var(--on-surface-variant);">
+          Touch Devices (hover: none)
+        </h3>
+        <ul style="font-size: 0.875rem; line-height: 1.8; color: var(--on-surface-variant);">
+          <li>Hover effects removed</li>
+          <li>Active state: scale(0.98) on press</li>
+          <li>Icon buttons: scale(0.95) on press</li>
+          <li>Links: opacity 0.7 on press</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="button-group" style="margin-top: 2rem;">
+      <button class="btn-primary">Press Me (Touch)</button>
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">touch_app</span>
+      </button>
+      <a href="#" class="nav-link">Touch Link</a>
+    </div>
+  </div>
+
+  <!-- Mobile-Specific Enforcement -->
+  <div class="demo-section">
+    <h2 class="demo-title">Mobile-Specific Enforcement (Requirement 12.1)</h2>
+    <p class="demo-description">
+      On mobile viewports (&lt;768px), all interactive elements are explicitly enforced to meet minimum touch target sizes.
+      Resize your browser window or use device emulation to see the effect.
+    </p>
+    <div style="background: var(--surface-low); padding: 1rem; border-radius: 0.5rem; font-size: 0.875rem;">
+      <code style="display: block; margin-bottom: 0.5rem;">@media (max-width: 47.9375rem) {</code>
+      <code style="display: block; margin-left: 1rem; margin-bottom: 0.5rem;">button, .btn, .icon-btn, .nav-link, .footer-link {</code>
+      <code style="display: block; margin-left: 2rem; margin-bottom: 0.5rem;">min-width: var(--touch-target-min); /* 44px */</code>
+      <code style="display: block; margin-left: 2rem; margin-bottom: 0.5rem;">min-height: var(--touch-target-min); /* 44px */</code>
+      <code style="display: block; margin-left: 1rem; margin-bottom: 0.5rem;">}</code>
+      <code style="display: block;">}</code>
+    </div>
+  </div>
+
+  <script>
+    // Display current viewport info
+    function updateDeviceInfo() {
+      const width = window.innerWidth;
+      const isMobile = width < 768;
+      const isTouch = !window.matchMedia('(hover: hover)').matches;
+      
+      const info = document.querySelector('.device-info');
+      info.innerHTML = `
+        <strong>Current Device Info:</strong><br>
+        Viewport Width: ${width}px<br>
+        Device Type: ${isMobile ? 'Mobile' : 'Desktop/Tablet'} (${isMobile ? '<768px' : '≥768px'})<br>
+        Touch Device: ${isTouch ? 'Yes (hover: none)' : 'No (hover: hover)'}<br>
+        Touch Target Enforcement: ${isMobile ? 'Active' : 'Standard'}
+      `;
+    }
+    
+    updateDeviceInfo();
+    window.addEventListener('resize', updateDeviceInfo);
+    
+    // Prevent default link behavior for demo
+    document.querySelectorAll('a[href="#"]').forEach(link => {
+      link.addEventListener('click', (e) => e.preventDefault());
+    });
+  </script>
+</body>
+</html>

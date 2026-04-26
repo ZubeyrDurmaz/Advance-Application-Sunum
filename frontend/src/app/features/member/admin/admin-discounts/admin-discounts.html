@@ -1,0 +1,143 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Admin Panel</h3>
+      <p class="sidebar-subtitle">System Control</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/admin']"><span class="material-symbols-outlined">admin_panel_settings</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/admin/stores']"><span class="material-symbols-outlined">storefront</span><span>Stores</span></a>
+      <a class="nav-link" [routerLink]="['/admin/users']"><span class="material-symbols-outlined">manage_accounts</span><span>Users</span></a>
+      <a class="nav-link" [routerLink]="['/admin/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link" [routerLink]="['/admin/products']"><span class="material-symbols-outlined">inventory_2</span><span>Products</span></a>
+      <a class="nav-link active" [routerLink]="['/admin/discounts']"><span class="material-symbols-outlined">loyalty</span><span>Discounts</span></a>
+      <a class="nav-link" [routerLink]="['/admin/analytics']"><span class="material-symbols-outlined">monitoring</span><span>Analytics</span></a>
+      <a class="nav-link" [routerLink]="['/admin/config']"><span class="material-symbols-outlined">tune</span><span>Config</span></a>
+    </nav>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <span class="section-label">Promotions</span>
+        <h1 class="corp-heading">Discount Codes</h1>
+        <p class="corp-subtext">Create, manage, and track discount codes across all stores.</p>
+      </div>
+      <button class="btn-primary" style="margin-top:1rem;" (click)="openAdd()">
+        <span class="material-symbols-outlined">add</span> New Coupon
+      </button>
+    </header>
+
+    @if (loading) {
+      <p style="color:#888;padding:2rem;">Loading discounts…</p>
+    } @else if (errorMessage) {
+      <p style="color:#e57373;padding:2rem;">{{ errorMessage }}</p>
+    } @else if (discounts.length === 0) {
+      <div class="dc-empty">
+        <span class="material-symbols-outlined">loyalty</span>
+        <p>No discount codes yet. Create one to get started.</p>
+      </div>
+    } @else {
+      <div class="dc-table-wrap">
+        <div class="dc-head">
+          <span>Code</span>
+          <span>Type</span>
+          <span>Value</span>
+          <span>Valid Period</span>
+          <span>Usage</span>
+          <span>Store</span>
+          <span>Status</span>
+          <span>Actions</span>
+        </div>
+        @for (d of discounts; track d.id) {
+          <div class="dc-row" [class.dc-row--expired]="isExpired(d)" [class.dc-row--inactive]="d.status === 'INACTIVE'">
+            <span class="dc-code">{{ d.code }}</span>
+            <span class="dc-type">{{ d.discountType }}</span>
+            <span class="dc-value">{{ d.discountType === 'PERCENTAGE' ? d.discountValue + '%' : '$' + d.discountValue }}</span>
+            <div class="dc-period">
+              <span class="dc-date">{{ formatDate(d.validFrom) }}</span>
+              <span class="dc-date-sep">→</span>
+              <span class="dc-date">{{ formatDate(d.validUntil) }}</span>
+            </div>
+            <div class="dc-usage">
+              <span class="dc-usage-count">{{ d.usedCount ?? 0 }} / {{ d.maxUses ?? '∞' }}</span>
+              <span class="dc-usage-remaining">{{ remainingUses(d) }} left</span>
+            </div>
+            <span class="dc-store">{{ d.storeName ?? '—' }}</span>
+            <span class="dc-status dc-status--{{ d.status?.toLowerCase() }}">{{ d.status }}</span>
+            <div class="dc-actions">
+              <button class="icon-btn" (click)="toggleStatus(d)" [title]="d.status === 'ACTIVE' ? 'Deactivate' : 'Activate'">
+                <span class="material-symbols-outlined">{{ d.status === 'ACTIVE' ? 'pause_circle' : 'play_circle' }}</span>
+              </button>
+              <button class="icon-btn" (click)="openEdit(d)" title="Edit">
+                <span class="material-symbols-outlined">edit</span>
+              </button>
+              <button class="icon-btn" style="color:#e57373;" (click)="deleteDiscount(d.id)" title="Delete">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">&copy; 2024 CHRONOS. All Rights Reserved.</p>
+</footer>
+
+<!-- Add/Edit Modal -->
+@if (showForm) {
+  <div class="modal-backdrop" (click)="cancelForm()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title serif">{{ editingId ? 'Edit Discount' : 'New Discount Code' }}</h3>
+        <button class="modal-close" (click)="cancelForm()"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Code</label>
+        <input class="modal-input" type="text" [(ngModel)]="form.code" placeholder="e.g. SUMMER25" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Type</label>
+        <select class="modal-input" [(ngModel)]="form.discountType">
+          <option value="PERCENTAGE">Percentage (%)</option>
+          <option value="FIXED">Fixed Amount ($)</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Value</label>
+        <input class="modal-input" type="number" min="0" [(ngModel)]="form.discountValue" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Valid From</label>
+        <input class="modal-input" type="datetime-local" [(ngModel)]="form.validFrom" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Valid Until</label>
+        <input class="modal-input" type="datetime-local" [(ngModel)]="form.validUntil" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Max Uses</label>
+        <input class="modal-input" type="number" min="1" [(ngModel)]="form.maxUses" />
+      </div>
+      @if (!editingId && stores.length) {
+        <div class="modal-field">
+          <label class="modal-label">Store</label>
+          <select class="modal-input" [(ngModel)]="form.storeId">
+            <option value="">— Select Store —</option>
+            @for (s of stores; track s.id) {
+              <option [value]="s.id">{{ s.name }}</option>
+            }
+          </select>
+        </div>
+      }
+      <div class="modal-actions">
+        <button class="btn-primary" (click)="submitForm()">{{ editingId ? 'Save Changes' : 'Create Coupon' }}</button>
+        <button class="btn-secondary" (click)="cancelForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+}

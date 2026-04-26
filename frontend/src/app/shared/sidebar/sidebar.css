@@ -1,0 +1,200 @@
+/* Mobile toggle button */
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min, 44px);
+  height: var(--touch-target-min, 44px);
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--on-surface, #1a1a1a);
+  transition: color 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  color: var(--primary, #2563eb);
+}
+
+.sidebar-toggle:focus-visible {
+  outline: 2px solid var(--primary, #2563eb);
+  outline-offset: 2px;
+}
+
+/* Overlay backdrop for mobile */
+.sidebar-overlay {
+  position: fixed;
+  /* Fallback for browsers without inset shorthand support - Requirement 19.5 */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  z-index: 99;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Sidebar container - Mobile first */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 80%;
+  max-width: 16rem;
+  height: 100vh;
+  background: var(--surface, #ffffff);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  will-change: transform; /* GPU acceleration - Requirement 18.5 */
+  z-index: 100;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* iOS momentum scrolling - Requirement 19.2 */
+  padding: var(--space-lg, 1rem);
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* Close button for mobile */
+.sidebar-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min, 44px);
+  height: var(--touch-target-min, 44px);
+  padding: 0;
+  margin-left: auto;
+  margin-bottom: var(--space-md, 0.75rem);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--on-surface, #1a1a1a);
+  transition: color 0.2s ease;
+}
+
+.sidebar-close:hover {
+  color: var(--primary, #2563eb);
+}
+
+.sidebar-close:focus-visible {
+  outline: 2px solid var(--primary, #2563eb);
+  outline-offset: 2px;
+}
+
+/* Navigation container */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--touch-spacing-min, 8px);
+}
+
+/* Navigation links */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 0.5rem);
+  min-height: var(--touch-target-min, 44px);
+  padding: var(--space-sm, 0.5rem) var(--space-md, 0.75rem);
+  color: var(--on-surface, #1a1a1a);
+  text-decoration: none;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-size: var(--font-size-base, 1rem);
+  font-weight: 500;
+}
+
+.sidebar-link:hover {
+  background-color: var(--surface-container, #f5f5f5);
+  color: var(--primary, #2563eb);
+}
+
+.sidebar-link:focus-visible {
+  outline: 2px solid var(--primary, #2563eb);
+  outline-offset: 2px;
+}
+
+.sidebar-link.active {
+  background-color: var(--primary-container, #dbeafe);
+  color: var(--primary, #2563eb);
+  font-weight: 600;
+}
+
+/* Icon styling */
+.sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+/* Label styling */
+.sidebar-label {
+  flex: 1;
+}
+
+/* Tablet and desktop: fixed sidebar, always visible */
+@media (min-width: 48rem) {
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .sidebar-overlay {
+    display: none;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 5.5rem;
+    transform: translateX(0);
+    width: 16rem;
+    height: calc(100vh - 5.5rem);
+    padding: var(--space-xl, 1.5rem);
+    z-index: 10;
+  }
+
+  .sidebar-close {
+    display: none;
+  }
+}
+
+/* Desktop: increased spacing */
+@media (min-width: 64rem) {
+  .sidebar {
+    width: 18rem;
+    padding: var(--space-2xl, 2rem);
+  }
+
+  .sidebar-nav {
+    gap: var(--space-sm, 0.5rem);
+  }
+
+  .sidebar-link {
+    padding: var(--space-md, 0.75rem) var(--space-lg, 1rem);
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+  .sidebar-link:active {
+    transform: scale(0.98);
+  }
+
+  .sidebar-toggle:active,
+  .sidebar-close:active {
+    transform: scale(0.95);
+  }
+}

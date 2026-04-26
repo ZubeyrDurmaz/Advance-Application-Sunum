@@ -1,0 +1,123 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Admin Panel</h3>
+      <p class="sidebar-subtitle">System Control</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link active" [routerLink]="['/admin']"><span class="material-symbols-outlined">admin_panel_settings</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/admin/stores']"><span class="material-symbols-outlined">storefront</span><span>Stores</span></a>
+      <a class="nav-link" [routerLink]="['/admin/users']"><span class="material-symbols-outlined">manage_accounts</span><span>Users</span></a>
+      <a class="nav-link" [routerLink]="['/admin/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link" [routerLink]="['/admin/products']"><span class="material-symbols-outlined">inventory_2</span><span>Products</span></a>
+      <a class="nav-link" [routerLink]="['/admin/discounts']"><span class="material-symbols-outlined">loyalty</span><span>Discounts</span></a>
+      <a class="nav-link" [routerLink]="['/admin/analytics']"><span class="material-symbols-outlined">monitoring</span><span>Analytics</span></a>
+      <a class="nav-link" [routerLink]="['/admin/config']"><span class="material-symbols-outlined">tune</span><span>Config</span></a>
+      <a class="nav-link" [routerLink]="['/admin/logs']"><span class="material-symbols-outlined">history</span><span>Audit Logs</span></a>
+    </nav>
+    <div class="sidebar-concierge">
+      <p class="sidebar-concierge-label">System Status</p>
+      <p class="sidebar-concierge-text">All systems operational.</p>
+      <button class="btn-concierge" [routerLink]="['/admin/logs']">View Logs</button>
+    </div>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <span class="section-label">System Administration</span>
+      <h1 class="corp-heading">Admin Dashboard</h1>
+      <p class="corp-subtext">Full platform control — manage stores, users, analytics and global configuration from a single interface.</p>
+    </header>
+
+    @if (error) {
+      <p style="color:#e57373;padding:1rem;">Failed to load dashboard data. Make sure the backend is running.</p>
+    }
+
+    <!-- KPI Grid -->
+    <div class="corp-bento">
+      <div class="corp-card corp-card--white">
+        <div class="corp-card-icon-wrap muted"><span class="material-symbols-outlined">group</span></div>
+        <h3 class="corp-card-sm-title">Total Users</h3>
+        <p class="corp-card-sm-value serif">{{ analytics?.totalUsers ?? '—' }}</p>
+      </div>
+      <div class="corp-card">
+        <div class="corp-card-icon-wrap muted"><span class="material-symbols-outlined">storefront</span></div>
+        <h3 class="corp-card-sm-title">Total Stores</h3>
+        <p class="corp-card-sm-value serif">{{ analytics?.totalStores ?? '—' }}</p>
+      </div>
+      <div class="corp-card">
+        <div class="corp-card-icon-wrap muted"><span class="material-symbols-outlined">receipt_long</span></div>
+        <h3 class="corp-card-sm-title">Total Orders</h3>
+        <p class="corp-card-sm-value serif">{{ analytics?.totalOrders ?? '—' }}</p>
+      </div>
+      <div class="corp-card">
+        <div class="corp-card-icon-wrap muted"><span class="material-symbols-outlined">payments</span></div>
+        <h3 class="corp-card-sm-title">Total Revenue</h3>
+        <p class="corp-card-sm-value serif">{{ analytics ? formatPrice(analytics.totalRevenue) : '—' }}</p>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <section style="margin-bottom:3rem;">
+      <span class="section-label">Quick Actions</span>
+      <div class="admin-actions">
+        <a class="admin-action-card" [routerLink]="['/admin/stores']">
+          <span class="material-symbols-outlined">storefront</span>
+          <span>Manage Stores</span>
+        </a>
+        <a class="admin-action-card" [routerLink]="['/admin/users']">
+          <span class="material-symbols-outlined">manage_accounts</span>
+          <span>User Management</span>
+        </a>
+        <a class="admin-action-card" [routerLink]="['/admin/orders']">
+          <span class="material-symbols-outlined">receipt_long</span>
+          <span>All Orders</span>
+        </a>
+        <a class="admin-action-card" [routerLink]="['/admin/analytics']">
+          <span class="material-symbols-outlined">monitoring</span>
+          <span>Platform Analytics</span>
+        </a>
+        <a class="admin-action-card" [routerLink]="['/admin/config']">
+          <span class="material-symbols-outlined">tune</span>
+          <span>Global Config</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Top Stores -->
+    <section>
+      <span class="section-label">Top Performing Stores</span>
+      <div class="analytics-chart-card">
+        @if (loading) {
+          <p style="color:#888;padding:1rem;">Loading…</p>
+        } @else if (!analytics?.topStores?.length) {
+          <p style="color:#888;padding:1rem;">No store data available.</p>
+        } @else {
+          <div class="activity-list">
+            @for (s of analytics!.topStores; track s.name) {
+              <div class="activity-row">
+                <div class="activity-icon activity-icon--store">
+                  <span class="material-symbols-outlined">storefront</span>
+                </div>
+                <div class="activity-content">
+                  <p class="activity-action">{{ s.name }}</p>
+                  <p class="activity-meta">{{ s.orders }} orders · {{ formatPrice(s.revenue) }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+  <div class="footer-links">
+    <a class="footer-link" href="#">Privacy</a>
+    <a class="footer-link" href="#">Terms</a>
+    <a class="footer-link" href="#">Support</a>
+  </div>
+</footer>

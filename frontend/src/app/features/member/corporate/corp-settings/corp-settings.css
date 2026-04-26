@@ -1,0 +1,53 @@
+/* Settings grid */
+.cs-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+@media (min-width: 1024px) { .cs-grid { grid-template-columns: 1fr 1fr; } }
+
+/* Toggle rows */
+.cs-toggles { display: flex; flex-direction: column; }
+.cs-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(231,229,220,0.3);
+}
+.cs-toggle-row:last-child { border-bottom: none; }
+.cs-toggle-label { font-size: 0.875rem; font-weight: 600; color: #1c1c19; margin-bottom: 0.125rem; }
+.cs-toggle-sub { font-size: 0.75rem; color: #78716c; }
+
+.cs-toggle {
+  position: relative;
+  width: 2.75rem; height: 1.5rem;
+  border-radius: 9999px;
+  background: #e7e5e4;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+}
+.cs-toggle--on { background: var(--primary); }
+.cs-toggle-knob {
+  position: absolute;
+  top: 0.125rem; left: 0.125rem;
+  width: 1.25rem; height: 1.25rem;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+  display: block;
+}
+.cs-toggle--on .cs-toggle-knob { transform: translateX(1.25rem); }
+
+/* Toast */
+.review-toast {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  background: #1c1c19; color: white; padding: 1rem 2rem;
+  border-radius: 0.5rem; font-family: 'Manrope', sans-serif; font-size: 0.875rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  z-index: 200; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}

@@ -1,0 +1,212 @@
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ============================================
+   MOBILE-FIRST FOOTER STYLES
+   ============================================ */
+
+/* Mobile: Reduced padding - Requirement 16.5 */
+.site-footer {
+  width: 100%;
+  padding: var(--space-2xl) var(--space-lg);
+  background-color: #f6f3ee;
+  border-top: 1px solid rgb(200 199 190 / 0.1);
+}
+
+.dark .site-footer {
+  background-color: #1c1c19;
+}
+
+/* Mobile: Vertical stacking, center-aligned - Requirements 16.1, 16.4 */
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+/* Mobile: Center-aligned brand column - Requirement 16.4 */
+.footer-brand-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  text-align: center;
+}
+
+/* Footer brand link - touch target size */
+.footer-brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1c1c19;
+  text-decoration: none;
+  cursor: pointer;
+  padding: var(--space-xs);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+}
+
+.dark .footer-brand {
+  color: #fcf9f4;
+}
+
+/* Footer copyright - minimum 12px - Requirement 16.6 */
+.footer-copyright {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.75rem; /* 12px minimum */
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #474741;
+  line-height: 1.5;
+}
+
+.dark .footer-copyright {
+  color: #c8c7be;
+}
+
+/* Mobile: Vertical stacking, center-aligned - Requirements 16.1, 16.4 */
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* Footer links - minimum touch target size - Requirement 16.3, 12.1 */
+.footer-link {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #474741;
+  transition: color 0.2s;
+  text-decoration: none;
+  cursor: pointer;
+  padding: var(--space-sm) var(--space-md);
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark .footer-link {
+  color: #c8c7be;
+}
+
+.footer-link:hover {
+  color: #a63b00;
+}
+
+/* Footer icons container */
+.footer-icons {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+/* Icon button wrapper - minimum touch target size - Requirement 16.3, 12.1 */
+.footer-icon-btn {
+  background: none;
+  border: none;
+  padding: var(--space-sm);
+  cursor: pointer;
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s, color 0.15s;
+}
+
+.footer-icon-btn:hover {
+  background-color: rgba(166, 59, 0, 0.1);
+}
+
+.footer-icon-btn:active {
+  transform: scale(0.98);
+}
+
+.footer-icon {
+  color: #474741;
+  transition: color 0.15s;
+  pointer-events: none;
+}
+
+.dark .footer-icon {
+  color: #c8c7be;
+}
+
+.footer-icon-btn:hover .footer-icon {
+  color: #a63b00;
+}
+
+/* Remove hover effects on touch devices - Requirement 12.4 */
+@media (hover: none) {
+  .footer-link:hover {
+    color: #474741;
+  }
+  
+  .dark .footer-link:hover {
+    color: #c8c7be;
+  }
+  
+  .footer-icon-btn:hover {
+    background-color: transparent;
+  }
+  
+  .footer-icon-btn:hover .footer-icon {
+    color: #474741;
+  }
+  
+  .dark .footer-icon-btn:hover .footer-icon {
+    color: #c8c7be;
+  }
+  
+  /* Active states for touch */
+  .footer-link:active {
+    color: #a63b00;
+  }
+  
+  .footer-icon-btn:active .footer-icon {
+    color: #a63b00;
+  }
+}
+
+/* ============================================
+   TABLET AND DESKTOP: HORIZONTAL LAYOUT
+   ============================================ */
+
+/* Tablet and up: Horizontal layout - Requirement 16.2 */
+@media (min-width: 48rem) {
+  .site-footer {
+    padding: var(--space-3xl) var(--space-2xl);
+  }
+  
+  .footer-inner {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2xl);
+  }
+  
+  .footer-brand-col {
+    align-items: flex-start;
+    text-align: left;
+  }
+  
+  .footer-links {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-lg);
+  }
+  
+  .footer-copyright {
+    font-size: 0.875rem;
+  }
+}

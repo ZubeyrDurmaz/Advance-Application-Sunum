@@ -1,0 +1,66 @@
+/* Stats */
+.inv-stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 1rem; }
+@media (min-width: 768px) { .inv-stats { grid-template-columns: repeat(4,1fr); } }
+.inv-stat { background: var(--surface-low); padding: 1.5rem; border-radius: 0.5rem; }
+.inv-stat--warn { border-left: 3px solid #d97706; }
+.inv-stat--danger { border-left: 3px solid #dc2626; }
+.inv-stat-value { font-family: 'Noto Serif', serif; font-size: 1.875rem; color: #1c1c19; }
+
+/* Table */
+.um-table-head {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr 2fr;
+  padding: 1rem 1.5rem;
+  background: var(--surface-high);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #78716c;
+  font-weight: 700;
+}
+
+.um-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr 2fr;
+  padding: 1.25rem 1.5rem;
+  align-items: center;
+  border-bottom: 1px solid rgba(231,229,220,0.3);
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+.um-row:last-child { border-bottom: none; }
+.um-row:hover { background: var(--surface-low); }
+
+/* Role badges */
+.um-role {
+  font-size: 0.625rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; padding: 0.25rem 0.625rem;
+  border-radius: 9999px; display: inline-block;
+}
+.um-role--individual { background: var(--primary-light); color: var(--primary); }
+.um-role--corporate { background: var(--tertiary-container); color: #866b00; }
+.um-role--admin { background: #1c1c19; color: white; }
+
+/* Last activity */
+.um-last-activity { color: #888; font-size: 0.8rem; }
+
+/* Status badges */
+.um-status {
+  font-size: 0.625rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; padding: 0.25rem 0.625rem;
+  border-radius: 9999px; display: inline-block;
+}
+.um-status--active { background: #dcfce7; color: #16a34a; }
+.um-status--pending { background: #fef3c7; color: #d97706; }
+.um-status--suspended { background: #fee2e2; color: #dc2626; }
+
+/* Status update buttons */
+.ord-status-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.ord-status-btn {
+  padding: 0.5rem 1rem; font-size: 0.75rem; font-family: 'Manrope', sans-serif;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border: 1px solid var(--outline); border-radius: 0.375rem;
+  color: #78716c; background: white; transition: all 0.2s;
+}
+.ord-status-btn--active { background: var(--primary); color: white; border-color: var(--primary); font-weight: 700; }
+.ord-status-btn--cancel.ord-status-btn--active { background: #dc2626; border-color: #dc2626; }

@@ -1,0 +1,89 @@
+<app-navbar />
+
+<main class="deals-page">
+  <header class="deals-hero">
+    <div class="deals-hero-inner">
+      <div class="deals-hero-text signature-border">
+        <span class="deals-eyebrow">Limited Opportunity</span>
+        <h1 class="deals-title">Exclusive Acquisitions</h1>
+        <p class="deals-subtitle">Curated timepieces with exceptional value. Discover rare masterpieces at remarkable acquisition rates.</p>
+        <div class="deals-cta-wrap">
+          <button class="deals-cta-btn">View All Curations</button>
+        </div>
+      </div>
+      <div class="deals-hero-visual">
+        <div class="deals-hero-img-wrap">
+          <img class="deals-hero-img"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSV4FmBTc_x71YeofeBiF5bnglWNaZ1D9Sk_CdbcqDDYgEYF8O8NPenbTTHVRRxzzZ3AI6NOBl1tUNPpB9oXInzthV4LTwkvFPvzSALJTdvWfHZBRANMMze3slD4ubXz5lNmA9liE-MUJc2qnmQVKNs9yJzzFKazI_5QCp155Pjepw_PflrrF1lsl_iRURl77ryxt_hiSECEXNwcGd9ziHrA8c9U7wzi03b3JwW4qOR7PdyNPav5_lc1u3XZ3Vum4bkzAPgA0kPr22"
+            alt="Luxury Watch Hero" />
+        </div>
+        <div class="deals-curator-quote">
+          <p class="deals-curator-label">Featured Curator Pick</p>
+          <p class="deals-curator-text">"The pursuit of precision at a value that honors history."</p>
+        </div>
+      </div>
+    </div>
+    <div class="deals-hero-deco"></div>
+  </header>
+
+  <section class="vault-header-section">
+    <div class="vault-header">
+      <div class="vault-header-text">
+        <h2 class="vault-section-title">The Vault</h2>
+        <p class="vault-section-sub">Current inventory of certified pre-owned and exclusive offers.</p>
+      </div>
+      <div class="vault-actions">
+        <span class="material-symbols-outlined vault-action-icon">filter_list</span>
+        <span class="material-symbols-outlined vault-action-icon">grid_view</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="vault-grid-section">
+    @if (loading) {
+      <p style="color:#888;padding:2rem;text-align:center;">Loading deals…</p>
+    } @else {
+      <div class="vault-grid product-grid">
+        @for (watch of watches; track watch.id) {
+          <div class="watch-card" [routerLink]="['/product', watch.slug]">
+            <div class="watch-image-wrap">
+              <img class="watch-image" appLazyLoad [src]="watch.image" [alt]="watch.name" />
+              @if (watch.badge) {
+                <div class="watch-badge-wrap">
+                  <span class="watch-badge"
+                    [class.watch-badge--tertiary]="watch.badgeStyle === 'tertiary'"
+                    [class.watch-badge--primary]="watch.badgeStyle === 'primary'">
+                    {{ watch.badge }}
+                  </span>
+                </div>
+              }
+              <div class="watch-hover-overlay"></div>
+            </div>
+            <div class="watch-info">
+              <p class="watch-brand">{{ watch.brand }}</p>
+              <h3 class="watch-name">{{ watch.name }}</h3>
+              <p class="watch-category">{{ watch.categoryName }}</p>
+              <div class="watch-pricing">
+                <span class="watch-price">{{ watch.price }}</span>
+              </div>
+              <button class="watch-inquire-btn">View Details</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="deals-newsletter">
+    <div class="deals-newsletter-inner">
+      <h2 class="deals-newsletter-title">Never Miss a Selection</h2>
+      <p class="deals-newsletter-body">Join our exclusive circle for first-access to limited acquisitions and curator insights before they reach the public vault.</p>
+      <div class="deals-newsletter-form">
+        <input class="deals-newsletter-input" placeholder="Email Address" type="email" [(ngModel)]="email" />
+        <button class="deals-newsletter-btn" (click)="onSubscribe()">Subscribe</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<app-footer />

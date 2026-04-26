@@ -1,0 +1,23 @@
+<div *ngIf="show" class="confirm-overlay" (click)="onOverlayClick()">
+  <div class="confirm-dialog" [class]="'confirm-' + type" (click)="$event.stopPropagation()">
+    <div class="confirm-header">
+      <span class="material-symbols-outlined confirm-icon">
+        {{ type === 'danger' ? 'warning' : type === 'warning' ? 'error_outline' : 'info' }}
+      </span>
+      <h3 class="confirm-title">{{ title }}</h3>
+    </div>
+    
+    <div class="confirm-body">
+      <p class="confirm-message">{{ message }}</p>
+    </div>
+    
+    <div class="confirm-footer">
+      <button type="button" class="btn-cancel" (click)="onCancel()">
+        {{ cancelText }}
+      </button>
+      <button type="button" [class]="'btn-confirm btn-confirm-' + type" (click)="onConfirm()">
+        {{ confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

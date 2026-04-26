@@ -1,0 +1,186 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Corporate Hub</h3>
+      <p class="sidebar-subtitle">Store Management</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/corporate']"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/corporate/inventory']"><span class="material-symbols-outlined">inventory_2</span><span>Inventory</span></a>
+      <a class="nav-link active" [routerLink]="['/corporate/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link" [routerLink]="['/corporate/analytics']"><span class="material-symbols-outlined">bar_chart</span><span>Analytics</span></a>
+      <a class="nav-link" [routerLink]="['/corporate/customers']"><span class="material-symbols-outlined">group</span><span>Customers</span></a>
+      <a class="nav-link" [routerLink]="['/corporate/corp-settings']"><span class="material-symbols-outlined">settings</span><span>Settings</span></a>
+    </nav>
+    <div class="sidebar-concierge">
+      <p class="sidebar-concierge-label">Support</p>
+      <p class="sidebar-concierge-text">Corporate account assistance available 24/7.</p>
+      <button class="btn-concierge">Contact Support</button>
+    </div>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <span class="section-label">Order Management</span>
+      <h1 class="corp-heading">Orders</h1>
+      <p class="corp-subtext">Track, manage and fulfill all customer orders. Update statuses and monitor shipments in real time.</p>
+    </header>
+
+    <!-- Stats -->
+    <div class="ord-stats">
+      <div class="ord-stat">
+        <p class="stat-label">Total Orders</p>
+        <p class="ord-stat-value serif">{{ orders().length }}</p>
+      </div>
+      <div class="ord-stat">
+        <p class="stat-label">Processing</p>
+        <p class="ord-stat-value serif">{{ processingCount() }}</p>
+      </div>
+      <div class="ord-stat">
+        <p class="stat-label">In Transit</p>
+        <p class="ord-stat-value serif">{{ transitCount() }}</p>
+      </div>
+      <div class="ord-stat">
+        <p class="stat-label">Delivered</p>
+        <p class="ord-stat-value serif">{{ deliveredCount() }}</p>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="inv-toolbar">
+      <div class="inv-search-wrap">
+        <span class="material-symbols-outlined inv-search-icon">search</span>
+        <input class="inv-search" type="text" placeholder="Search by order ID, customer or item..." [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+      </div>
+      <div class="inv-filter-tabs">
+        <button class="inv-tab" [class.inv-tab--active]="filterStatus() === 'all'" (click)="filterStatus.set('all')">All</button>
+        <button class="inv-tab" [class.inv-tab--active]="filterStatus() === 'processing'" (click)="filterStatus.set('processing')">Processing</button>
+        <button class="inv-tab" [class.inv-tab--active]="filterStatus() === 'transit'" (click)="filterStatus.set('transit')">In Transit</button>
+        <button class="inv-tab" [class.inv-tab--active]="filterStatus() === 'delivered'" (click)="filterStatus.set('delivered')">Delivered</button>
+        <button class="inv-tab" [class.inv-tab--active]="filterStatus() === 'cancelled'" (click)="filterStatus.set('cancelled')">Cancelled</button>
+      </div>
+    </div>
+
+    <!-- Mobile: Card Layout -->
+    @if (isMobile()) {
+      <div class="ord-table-cards">
+        @for (o of filtered(); track o.id) {
+          <div class="ord-card">
+            <div class="ord-card-header">
+              <div>
+                <p class="ord-order-id">{{ o.id }}</p>
+                <p class="ord-customer-name">{{ o.storeName }}</p>
+              </div>
+              <button class="icon-btn" (click)="openModal(o)">
+                <span class="material-symbols-outlined">open_in_new</span>
+              </button>
+            </div>
+            
+            <div class="ord-card-body">
+              <div class="ord-card-row">
+                <span class="ord-card-label">Store</span>
+                <span class="ord-card-value">{{ o.storeName }}</span>
+              </div>
+              <div class="ord-card-row">
+                <span class="ord-card-label">Items</span>
+                <span class="ord-card-value">{{ o.items.length }} item(s)</span>
+              </div>
+              <div class="ord-card-row">
+                <span class="ord-card-label">Amount</span>
+                <span class="ord-card-value ord-amount">{{ formatPrice(o.grandTotal) }}</span>
+              </div>
+              <div class="ord-card-row">
+                <span class="ord-card-label">Date</span>
+                <span class="ord-card-value">{{ formatDate(o.orderDate) }}</span>
+              </div>
+              <div class="ord-card-row">
+                <span class="ord-card-label">Status</span>
+                <span class="ord-card-value">
+                  <span class="corp-order-status corp-order-status--{{ displayStatus(o.status) }}">{{ displayStatus(o.status) }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+        @if (filtered().length === 0) {
+          <div class="inv-empty">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <p>No orders match your search.</p>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Desktop: Traditional Table -->
+      <div class="inv-table">
+        <div class="ord-table-head">
+          <span>Order ID</span>
+          <span>Store</span>
+          <span>Items</span>
+          <span>Amount</span>
+          <span>Date</span>
+          <span>Status</span>
+          <span></span>
+        </div>
+        @for (o of filtered(); track o.id) {
+          <div class="ord-row" (click)="openModal(o)">
+            <span class="corp-order-id">{{ o.id }}</span>
+            <div>
+              <p class="inv-product-name">{{ o.storeName }}</p>
+              <p class="inv-product-brand">{{ o.paymentMethod }}</p>
+            </div>
+            <span class="ord-item">{{ o.items.length }} item(s)</span>
+            <span class="ord-amount">{{ formatPrice(o.grandTotal) }}</span>
+            <span class="ord-date">{{ formatDate(o.orderDate) }}</span>
+            <span class="corp-order-status corp-order-status--{{ displayStatus(o.status) }}">{{ displayStatus(o.status) }}</span>
+            <button class="icon-btn" (click)="$event.stopPropagation(); openModal(o)"><span class="material-symbols-outlined">open_in_new</span></button>
+          </div>
+        }
+        @if (filtered().length === 0) {
+          <div class="inv-empty">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <p>No orders match your search.</p>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+  <div class="footer-links">
+    <a class="footer-link" href="#">Privacy</a>
+    <a class="footer-link" href="#">Terms</a>
+    <a class="footer-link" href="#">Support</a>
+  </div>
+</footer>
+
+<!-- Order Detail Modal -->
+@if (selectedOrder) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title serif">{{ selectedOrder.id }}</h3>
+        <button class="modal-close" (click)="closeModal()"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="ord-detail-rows">
+        <div class="ord-detail-row"><span class="modal-label">Store</span><span>{{ selectedOrder.storeName }}</span></div>
+        <div class="ord-detail-row"><span class="modal-label">Payment</span><span>{{ selectedOrder.paymentMethod }}</span></div>
+        <div class="ord-detail-row"><span class="modal-label">Items</span><span>{{ selectedOrder.items.length }} item(s)</span></div>
+        <div class="ord-detail-row"><span class="modal-label">Amount</span><span class="ord-amount">{{ formatPrice(selectedOrder.grandTotal) }}</span></div>
+        <div class="ord-detail-row"><span class="modal-label">Date</span><span>{{ formatDate(selectedOrder.orderDate) }}</span></div>
+        <div class="ord-detail-row"><span class="modal-label">Status</span><span class="corp-order-status corp-order-status--{{ displayStatus(selectedOrder.status) }}">{{ displayStatus(selectedOrder.status) }}</span></div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Update Status</label>
+        <div class="ord-status-btns">
+          <button class="ord-status-btn" [class.ord-status-btn--active]="statusGroup(selectedOrder.status) === 'processing'" (click)="updateStatus(selectedOrder.id, 'processing')">Processing</button>
+          <button class="ord-status-btn" [class.ord-status-btn--active]="statusGroup(selectedOrder.status) === 'transit'" (click)="updateStatus(selectedOrder.id, 'transit')">In Transit</button>
+          <button class="ord-status-btn" [class.ord-status-btn--active]="statusGroup(selectedOrder.status) === 'delivered'" (click)="updateStatus(selectedOrder.id, 'delivered')">Delivered</button>
+          <button class="ord-status-btn ord-status-btn--cancel" [class.ord-status-btn--active]="statusGroup(selectedOrder.status) === 'cancelled'" (click)="updateStatus(selectedOrder.id, 'cancelled')">Cancelled</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

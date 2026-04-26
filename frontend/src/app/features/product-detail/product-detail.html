@@ -1,0 +1,230 @@
+<div class="luxury-frame">
+  <app-navbar />
+
+  @if (loading) {
+    <main class="pd-main" style="display:flex; justify-content:center; padding: 100px; color: white;">
+      <p>Loading product...</p>
+    </main>
+  }
+  @if (!loading && product) {
+  <main class="pd-main">
+    <section class="pd-hero">
+      <div class="pd-hero-bg">
+        <img [src]="product.heroImage" [alt]="product.name" class="pd-hero-img" />
+        <div class="pd-hero-overlay"></div>
+      </div>
+      <div class="pd-hero-content">
+        <span class="pd-category">{{ product.category }}</span>
+        <h1 class="pd-title">
+          {{ product.brand }}<br />
+          <span class="pd-model">{{ product.model }}</span>
+        </h1>
+        <div class="pd-hero-actions">
+          <span class="pd-price">{{ product.price }}</span>
+          <button class="pd-add-to-cart-btn" (click)="addToCart()">Add to Cart</button>
+          <button class="pd-buy-now-btn" (click)="buyNow()">Buy Now</button>
+          @if (cartService.itemCount() > 0) {
+            <a [routerLink]="['/cart']" class="pd-view-cart-link">
+              <span class="material-symbols-outlined">shopping_bag</span>
+              View Cart ({{ cartService.itemCount() }})
+            </a>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="pd-details-section">
+      <div class="pd-details-inner">
+        <div class="pd-details-grid">
+          <div class="pd-details-left">
+            <h2 class="pd-details-heading">The Legacy of Perfection</h2>
+            <p class="pd-description">{{ product.description }}</p>
+            <p class="pd-description">Every element is designed to serve a singular purpose: the elegant transmission of time. From the hand-finished movement to the hand-stitched leather strap, no detail is overlooked.</p>
+          </div>
+          <div class="pd-specs-card">
+            <h3 class="pd-specs-title">Technical Overview</h3>
+            <dl class="pd-specs-list">
+              @for (spec of product.specs; track spec.label) {
+                <div class="pd-spec-row">
+                  <dt class="pd-spec-label">{{ spec.label }}</dt>
+                  <dd class="pd-spec-value">{{ spec.value }}</dd>
+                </div>
+              }
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pd-craft-section">
+      <div class="pd-craft-inner">
+        <h2 class="pd-craft-title">The Mastery of <em>Metiers d'Art</em></h2>
+        <div class="pd-craft-grid">
+          @for (craft of craftsmanship; track craft.title) {
+            <div class="pd-craft-item">
+              <span class="pd-craft-number">{{ craft.number }}</span>
+              <h4 class="pd-craft-item-title">{{ craft.title }}</h4>
+              <p class="pd-craft-item-body">{{ craft.description }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="pd-reviews-section">
+      <div class="pd-reviews-inner">
+        <div class="pd-reviews-layout">
+          <div class="pd-rating-summary">
+            <h2 class="pd-reviews-heading">Client Experiences</h2>
+            @if (reviewCount > 0) {
+              <div class="pd-rating-score">
+                <span class="pd-rating-number">{{ averageRating }}</span>
+                <span class="pd-rating-denom">/ 5</span>
+              </div>
+              <div class="pd-stars">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <span class="material-symbols-outlined pd-star" [class.star-filled]="star <= averageRating" [class.star-empty]="star > averageRating">star</span>
+                }
+              </div>
+              <p class="pd-review-count">Based on {{ reviewCount }} {{ reviewCount === 1 ? 'review' : 'reviews' }}</p>
+              <div class="pd-rating-bars">
+                @for (bar of ratingBars; track bar.label) {
+                  <div class="pd-rating-bar-row" [class.pd-bar-empty]="bar.pct === 0">
+                    <span class="pd-bar-label">{{ bar.label }}</span>
+                    <div class="pd-bar-track">
+                      <div class="pd-bar-fill" [style.width]="bar.pct + '%'"></div>
+                    </div>
+                    <span class="pd-bar-pct">{{ bar.pct }}%</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="pd-no-reviews-yet">No reviews yet. Be the first to share your experience!</p>
+            }
+            <button class="pd-write-review-btn" (click)="openReviewModal()">Write a Review</button>
+          </div>
+
+          <div class="pd-reviews-list">
+            @if (reviewsLoading) {
+              <p style="color:#888;padding:1rem;">Loading reviews…</p>
+            } @else if (reviews.length === 0) {
+              <div class="pd-empty-reviews">
+                <span class="material-symbols-outlined" style="font-size:2.5rem;color:#666;">rate_review</span>
+                <p>No reviews yet for this timepiece.</p>
+              </div>
+            } @else {
+              @for (review of reviews; track review.author + review.date) {
+                <div class="pd-review-item">
+                  <div class="pd-review-header">
+                    <div class="pd-review-stars">
+                      <div class="pd-stars">
+                        @for (star of [1,2,3,4,5]; track star) {
+                          <span class="material-symbols-outlined pd-star" [class.star-filled]="star <= review.starRating" [class.star-empty]="star > review.starRating">star</span>
+                        }
+                      </div>
+                      <h4 class="pd-review-title">{{ review.title }}</h4>
+                    </div>
+                    <div class="pd-review-meta">
+                      <p class="pd-review-author">{{ review.author }}</p>
+                      <p class="pd-review-date">{{ review.date }}</p>
+                    </div>
+                  </div>
+                  <div class="pd-verified-row">
+                    <span class="material-symbols-outlined star-filled pd-verified-icon">verified</span>
+                    <span class="pd-verified-label">Verified Purchase</span>
+                  </div>
+                  <p class="pd-review-body">{{ review.body }}</p>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  }
+
+  <app-footer />
+</div>
+
+<!-- Review Form Modal -->
+@if (showReviewForm) {
+  <div class="review-backdrop" (click)="closeReviewModal()">
+    <div class="review-modal" (click)="$event.stopPropagation()">
+      <div class="review-modal-header">
+        <h3 class="review-modal-title serif">Write a Review</h3>
+        <button class="review-close-btn" (click)="closeReviewModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      @if (!isAuthenticated) {
+        <div class="review-auth-warning">
+          <span class="material-symbols-outlined" style="color:#e57373;">lock</span>
+          <p>You need to <a routerLink="/login" style="color:var(--color-primary);text-decoration:underline;">sign in</a> to write a review.</p>
+        </div>
+      } @else if (isCorporate) {
+        <div class="review-auth-warning">
+          <span class="material-symbols-outlined" style="color:#e57373;">business</span>
+          <p>Corporate accounts cannot write reviews. Please use an individual account.</p>
+        </div>
+      } @else {
+        <div class="review-rating-pick">
+          <p class="review-field-label">Your Rating</p>
+          <div class="review-stars-pick">
+            @for (n of [1,2,3,4,5]; track n) {
+              <button class="review-star-btn" (click)="setRating(n)">
+                <span class="material-symbols-outlined review-star" [class.review-star--filled]="n <= reviewRating">star</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="review-field">
+          <label class="review-field-label">Your Experience</label>
+          <textarea class="review-textarea" rows="4" placeholder="Share your thoughts on this timepiece..." [(ngModel)]="reviewBody"></textarea>
+        </div>
+
+        @if (reviewError) {
+          <p style="color:#e57373;font-size:0.875rem;margin-bottom:0.5rem;">{{ reviewError }}</p>
+        }
+
+        <button class="review-submit-btn" (click)="submitReview()" [disabled]="!reviewBody.trim()">Submit Review</button>
+      }
+    </div>
+  </div>
+}
+
+@if (reviewSubmitted) {
+  <div class="review-toast">
+    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24;">check_circle</span>
+    Review submitted successfully
+  </div>
+}
+
+<!-- Auth/Role Prompt Modal -->
+@if (showAuthPrompt) {
+  <div class="review-backdrop" (click)="closeAuthPrompt()">
+    <div class="review-modal" (click)="$event.stopPropagation()">
+      <div class="review-modal-header">
+        <h3 class="review-modal-title serif">Action Required</h3>
+        <button class="review-close-btn" (click)="closeAuthPrompt()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="review-auth-warning">
+        @if (!isAuthenticated) {
+          <span class="material-symbols-outlined" style="color:#e57373;font-size:2rem;">lock</span>
+        } @else {
+          <span class="material-symbols-outlined" style="color:#e57373;font-size:2rem;">block</span>
+        }
+        <p style="font-size:1rem;line-height:1.6;">{{ authPromptMessage }}</p>
+      </div>
+      @if (!isAuthenticated) {
+        <button class="review-submit-btn" (click)="goToLogin()">Sign In</button>
+      }
+      <button class="pd-write-review-btn" style="background:transparent;color:var(--color-on-surface);border:1px solid var(--color-outline-variant);" (click)="closeAuthPrompt()">Close</button>
+    </div>
+  </div>
+}
+

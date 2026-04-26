@@ -1,0 +1,25 @@
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand-col">
+      <a [routerLink]="['/']" class="footer-brand">CHRONOS</a>
+      <p class="footer-copyright">© 2024 CHRONOS CURATORS. ALL RIGHTS RESERVED.</p>
+    </div>
+    <nav class="footer-links" aria-label="Footer navigation">
+      @for (link of links; track link.label) {
+        <a class="footer-link"
+          [routerLink]="link.route ? [link.route] : null"
+          [href]="link.route ? null : '#'">
+          {{ link.label }}
+        </a>
+      }
+    </nav>
+    <div class="footer-icons">
+      <button class="footer-icon-btn" aria-label="Language">
+        <span class="material-symbols-outlined footer-icon">public</span>
+      </button>
+      <button class="footer-icon-btn" aria-label="Favorites">
+        <span class="material-symbols-outlined footer-icon">star</span>
+      </button>
+    </div>
+  </div>
+</footer>

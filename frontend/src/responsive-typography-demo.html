@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Typography Demo - CHRONOS</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .demo-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .demo-section {
+      margin-bottom: 4rem;
+      padding: 2rem;
+      background: var(--surface-container);
+      border-radius: 0.5rem;
+    }
+    .demo-title {
+      font-family: 'Noto Serif', serif;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+    .demo-description {
+      color: var(--on-surface-variant);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .typography-sample {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 0.375rem;
+      border-left: 3px solid var(--primary);
+    }
+    .sample-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--stone-400);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .font-size-display {
+      font-size: 0.625rem;
+      color: var(--stone-400);
+      margin-top: 0.5rem;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <header style="margin-bottom: 3rem;">
+      <h1 style="font-family: 'Noto Serif', serif; margin-bottom: 0.5rem;">
+        Responsive Typography System Demo
+      </h1>
+      <p style="color: var(--on-surface-variant); font-size: 1.125rem;">
+        Testing fluid typography with clamp() for mobile-first responsive design
+      </p>
+    </header>
+
+    <!-- Heading Scale Demo -->
+    <section class="demo-section">
+      <h2 class="demo-title">Heading Scale (h1-h6)</h2>
+      <p class="demo-description">
+        All headings use fluid typography with clamp() to scale smoothly from mobile to desktop.
+        Resize your browser to see the responsive behavior.
+      </p>
+
+      <div class="typography-sample">
+        <div class="sample-label">H1 / .text-5xl</div>
+        <h1>The Art of Horological Excellence</h1>
+        <div class="font-size-display">clamp(2.25rem, 8vw, 3rem) | line-height: 1.2</div>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">H2 / .text-4xl</div>
+        <h2>Curated Timepiece Collections</h2>
+        <div class="font-size-display">clamp(1.875rem, 6vw, 2.25rem) | line-height: 1.3</div>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">H3 / .text-3xl</div>
+        <h3>Swiss Craftsmanship Tradition</h3>
+        <div class="font-size-display">clamp(1.5rem, 5vw, 1.875rem) | line-height: 1.4</div>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">H4 / .text-2xl</div>
+        <h4>Mechanical Movement Precision</h4>
+        <div class="font-size-display">clamp(1.25rem, 4vw, 1.5rem) | line-height: 1.4</div>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">H5 / .text-xl</div>
+        <h5>Automatic Chronograph Features</h5>
+        <div class="font-size-display">clamp(1.125rem, 3.5vw, 1.25rem) | line-height: 1.5</div>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">H6 / .text-lg</div>
+        <h6>Sapphire Crystal Display</h6>
+        <div class="font-size-display">clamp(1rem, 3vw, 1.125rem) | line-height: 1.5</div>
+      </div>
+    </section>
+
+    <!-- Body Text Scale Demo -->
+    <section class="demo-section">
+      <h2 class="demo-title">Body Text Scale</h2>
+      <p class="demo-description">
+        Body text utilities ensure minimum 14px (0.875rem) on mobile with line heights between 1.4 and 1.6 for optimal readability.
+      </p>
+
+      <div class="typography-sample">
+        <div class="sample-label">.text-base (default body text)</div>
+        <p class="text-base">
+          The CHRONOS collection represents the pinnacle of Swiss watchmaking tradition, 
+          combining centuries-old craftsmanship with modern precision engineering. Each timepiece 
+          is meticulously assembled by master horologists in our Geneva atelier.
+        </p>
+        <div class="font-size-display">clamp(0.875rem, 2.5vw, 1rem) | line-height: 1.6</div>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">.text-sm</div>
+        <p class="text-sm">
+          Our commitment to excellence extends beyond the movement itself. Every component, 
+          from the smallest screw to the intricate dial work, undergoes rigorous quality control 
+          to ensure it meets our exacting standards.
+        </p>
+        <div class="font-size-display">clamp(0.75rem, 2vw, 0.875rem) | line-height: 1.5</div>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">.text-xs</div>
+        <p class="text-xs">
+          Limited edition pieces are accompanied by certificates of authenticity and detailed 
+          provenance documentation, ensuring the integrity and value of your investment for 
+          generations to come.
+        </p>
+        <div class="font-size-display">clamp(0.625rem, 1.5vw, 0.75rem) | line-height: 1.4</div>
+      </div>
+    </section>
+
+    <!-- Utility Classes Demo -->
+    <section class="demo-section">
+      <h2 class="demo-title">Utility Classes (.text-xs through .text-5xl)</h2>
+      <p class="demo-description">
+        All utility classes are available for flexible text sizing throughout the application.
+      </p>
+
+      <div class="typography-sample">
+        <div class="sample-label">.text-5xl</div>
+        <p class="text-5xl">Nautilus Collection</p>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">.text-4xl</div>
+        <p class="text-4xl">Royal Oak Series</p>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">.text-3xl</div>
+        <p class="text-3xl">Submariner Heritage</p>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">.text-2xl</div>
+        <p class="text-2xl">Daytona Chronograph</p>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">.text-xl</div>
+        <p class="text-xl">Speedmaster Professional</p>
+      </div>
+
+      <div class="typography-sample">
+        <div class="sample-label">.text-lg</div>
+        <p class="text-lg">Santos de Cartier</p>
+      </div>
+    </section>
+
+    <!-- Responsive Behavior Demo -->
+    <section class="demo-section">
+      <h2 class="demo-title">Responsive Behavior Test</h2>
+      <p class="demo-description">
+        Resize your browser window to see how typography scales smoothly across breakpoints:
+      </p>
+      <ul style="list-style: none; padding: 0; margin: 1rem 0;">
+        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--outline-variant);">
+          <strong>Mobile (&lt;768px):</strong> Minimum font sizes ensure readability on small screens
+        </li>
+        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--outline-variant);">
+          <strong>Tablet (768px-1023px):</strong> Fluid scaling based on viewport width
+        </li>
+        <li style="padding: 0.5rem 0;">
+          <strong>Desktop (≥1024px):</strong> Maximum font sizes for optimal reading experience
+        </li>
+      </ul>
+
+      <div style="margin-top: 2rem; padding: 1.5rem; background: var(--primary-light); border-radius: 0.375rem;">
+        <h3 style="margin-bottom: 1rem;">Key Features</h3>
+        <ul style="line-height: 1.8; color: var(--on-surface-variant);">
+          <li>✓ Fluid typography using clamp() function</li>
+          <li>✓ Minimum 14px (0.875rem) body text on mobile</li>
+          <li>✓ Headings reduced by 20-30% on mobile vs desktop</li>
+          <li>✓ Line heights between 1.4-1.8 for body text</li>
+          <li>✓ Utility classes for all text sizes (.text-xs through .text-5xl)</li>
+          <li>✓ Smooth scaling across all viewport sizes</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Current Viewport Info -->
+    <section class="demo-section">
+      <h2 class="demo-title">Current Viewport Information</h2>
+      <div style="padding: 1rem; background: white; border-radius: 0.375rem; font-family: monospace;">
+        <p style="margin-bottom: 0.5rem;"><strong>Width:</strong> <span id="viewport-width"></span>px</p>
+        <p style="margin-bottom: 0.5rem;"><strong>Height:</strong> <span id="viewport-height"></span>px</p>
+        <p><strong>Breakpoint:</strong> <span id="breakpoint"></span></p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function updateViewportInfo() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      let breakpoint = 'Desktop (≥1024px)';
+      
+      if (width < 768) {
+        breakpoint = 'Mobile (<768px)';
+      } else if (width < 1024) {
+        breakpoint = 'Tablet (768px-1023px)';
+      }
+      
+      document.getElementById('viewport-width').textContent = width;
+      document.getElementById('viewport-height').textContent = height;
+      document.getElementById('breakpoint').textContent = breakpoint;
+    }
+    
+    updateViewportInfo();
+    window.addEventListener('resize', updateViewportInfo);
+  </script>
+</body>
+</html>

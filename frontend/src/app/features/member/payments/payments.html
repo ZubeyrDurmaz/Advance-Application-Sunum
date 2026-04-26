@@ -1,0 +1,391 @@
+<div class="page-layout">
+  <aside class="sidebar" role="complementary" aria-label="Member navigation">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">Member Lounge</h2>
+      <p class="sidebar-subtitle">Private Collection</p>
+    </div>
+    <nav class="sidebar-nav" aria-label="Main navigation">
+      <a class="nav-link" [routerLink]="['/dashboard']" aria-label="Go to Dashboard"><span class="material-symbols-outlined" aria-hidden="true">dashboard</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/order-history']" aria-label="Go to Order History"><span class="material-symbols-outlined" aria-hidden="true">history</span><span>History</span></a>
+      <a class="nav-link active" [routerLink]="['/payments']" aria-current="page" aria-label="Payments (current page)"><span class="material-symbols-outlined" aria-hidden="true">payments</span><span>Payments</span></a>
+      <a class="nav-link" [routerLink]="['/addresses']" aria-label="Go to Addresses"><span class="material-symbols-outlined" aria-hidden="true">home_pin</span><span>Addresses</span></a>
+      <a class="nav-link" [routerLink]="['/settings']" aria-label="Go to Settings"><span class="material-symbols-outlined" aria-hidden="true">settings</span><span>Settings</span></a>
+    </nav>
+    <div class="sidebar-user" role="region" aria-label="User profile">
+      <div class="sidebar-avatar" style="border-radius:0.5rem;" aria-hidden="true"><span class="material-symbols-outlined">person</span></div>
+      <div>
+        <p class="sidebar-user-name">Alexandre V.</p>
+        <p class="sidebar-user-role">Tier I Member</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="pay-main" role="main">
+    <div class="pay-inner">
+      <!-- Success Message -->
+      <div *ngIf="successMessage" class="alert alert-success" role="alert" aria-live="polite">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>{{ successMessage }}</span>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage && !showModal" class="alert alert-error" role="alert" aria-live="assertive">
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div class="pay-header">
+        <div>
+          <h2 class="pay-heading serif">Payment Methods</h2>
+          <p class="pay-subtext">Manage your secure procurement channels. All data is encrypted with military-grade protocols.</p>
+        </div>
+        <div class="pay-security-badge" role="status" aria-label="Security status: AES-256 encryption enabled">
+          <span class="material-symbols-outlined icon-filled" style="color:var(--tertiary);" aria-hidden="true">verified_user</span>
+          <span class="pay-security-text">AES-256 Enabled</span>
+        </div>
+      </div>
+
+      <div class="pay-grid">
+        <div class="pay-left">
+          <div class="pay-cards-header">
+            <h3 class="pay-cards-title serif">Curated Credentials</h3>
+            <button class="btn-ghost" (click)="openCreateModal()" aria-label="Add new payment card">
+              <span class="material-symbols-outlined" style="font-size:1rem;" aria-hidden="true">add</span>Add New Card
+            </button>
+          </div>
+
+          <!-- Loading Skeleton -->
+          <div *ngIf="isLoading && isInitialLoad" class="skeleton-grid" role="status" aria-live="polite" aria-label="Loading payment methods">
+            <app-skeleton-card type="payment"></app-skeleton-card>
+            <app-skeleton-card type="payment"></app-skeleton-card>
+            <app-skeleton-card type="payment"></app-skeleton-card>
+          </div>
+
+          <!-- Loading Spinner (for subsequent loads) -->
+          <div *ngIf="isLoading && !isInitialLoad" class="loading-spinner" role="status" aria-live="polite" aria-label="Loading payment methods">
+            <span class="material-symbols-outlined spinning" aria-hidden="true">progress_activity</span>
+            <p>Yükleniyor...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!isLoading && paymentMethods.length === 0" class="empty-state" role="status">
+            <span class="material-symbols-outlined" aria-hidden="true">credit_card_off</span>
+            <p>Henüz ödeme yöntemi eklenmedi</p>
+            <button class="btn-primary" (click)="openCreateModal()" aria-label="Add your first payment card">İlk Kartınızı Ekleyin</button>
+          </div>
+
+          <!-- Payment Methods Grid -->
+          <div *ngIf="!isLoading && paymentMethods.length > 0" class="pay-cards-grid" role="list" aria-label="Payment methods">
+            <article *ngFor="let method of paymentMethods" 
+                 [class.payment-card]="true" 
+                 [class.primary]="method.isDefault"
+                 [class.business]="!method.isDefault"
+                 role="listitem"
+                 [attr.aria-label]="(method.isDefault ? 'Primary payment method: ' : 'Payment method: ') + (method.provider || method.methodType) + ' ending in ' + method.lastFour">
+              <div class="payment-card-top">
+                <span *ngIf="method.isDefault" class="payment-card-label-primary" role="status">Primary</span>
+                <span *ngIf="!method.isDefault" class="payment-card-label-business">{{ method.methodType }}</span>
+                <div class="payment-card-actions" role="group" aria-label="Payment method actions">
+                  <button class="payment-card-more" (click)="openEditModal(method)" aria-label="Edit payment method">
+                    <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                  </button>
+                  <button *ngIf="!method.isDefault" class="payment-card-more" (click)="setAsDefault(method.id)" aria-label="Set as default payment method">
+                    <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                  </button>
+                  <button class="payment-card-more" (click)="deletePaymentMethod(method.id)" aria-label="Delete payment method">
+                    <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <p class="payment-card-type">{{ method.provider || method.methodType }}</p>
+                <p class="card-number" aria-label="Card number ending in {{ method.lastFour }}">•••• •••• •••• {{ method.lastFour }}</p>
+              </div>
+              <div class="payment-card-bottom">
+                <div>
+                  <p class="card-exp-label">Exp Date</p>
+                  <p class="card-exp-value" aria-label="Expiry date {{ method.expiryDate }}">{{ method.expiryDate }}</p>
+                </div>
+                <div *ngIf="method.provider === 'Visa'" class="card-visa" aria-label="Visa card">VISA</div>
+                <svg *ngIf="method.provider === 'MasterCard'" class="card-logo" fill="none" viewBox="0 0 48 32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MasterCard logo">
+                  <circle cx="16" cy="16" fill="#eb001b" fill-opacity="0.8" r="16"></circle>
+                  <circle cx="32" cy="16" fill="#f79e1b" fill-opacity="0.8" r="16"></circle>
+                </svg>
+              </div>
+            </article>
+          </div>
+
+          <div class="crypto-vault">
+            <div class="crypto-vault-content">
+              <h3 class="crypto-vault-title serif">Crypto Vault</h3>
+              <p class="crypto-vault-text">Secure acquisitions via blockchain settlement. We support Ethereum, Bitcoin, and USDC.</p>
+              <button class="btn-crypto">Link Digital Assets</button>
+            </div>
+            <div class="crypto-vault-icon"><span class="material-symbols-outlined">token</span></div>
+          </div>
+        </div>
+
+        <div class="pay-right">
+          <div class="billing-panel">
+            <h4 class="billing-panel-title">Default Billing</h4>
+            
+            <!-- Loading state for billing profile -->
+            <div *ngIf="isBillingLoading" class="billing-loading" role="status" aria-live="polite" aria-label="Loading billing information">
+              <span class="material-symbols-outlined spinning" aria-hidden="true">progress_activity</span>
+              <p>Fatura bilgileri yükleniyor...</p>
+            </div>
+            
+            <!-- Error state for billing profile -->
+            <div *ngIf="!isBillingLoading && billingErrorMessage" class="billing-error" role="alert" aria-live="assertive">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <p>{{ billingErrorMessage }}</p>
+              <button class="btn-retry" (click)="loadBillingProfile()" aria-label="Retry loading billing information">
+                Tekrar Dene
+              </button>
+            </div>
+            
+            <!-- No billing address state -->
+            <div *ngIf="!isBillingLoading && !billingErrorMessage && !billingProfile" class="billing-empty" role="status">
+              <span class="material-symbols-outlined" aria-hidden="true">location_off</span>
+              <p>Henüz fatura adresi ayarlanmamış</p>
+              <p class="billing-empty-subtitle">Ödeme işlemleriniz için bir fatura adresi belirleyin</p>
+              <button class="btn-setup-billing" (click)="openEditBillingProfile()" aria-label="Set up billing address">
+                Fatura Adresi Ayarla
+              </button>
+            </div>
+            
+            <!-- Billing profile display -->
+            <div *ngIf="!isBillingLoading && !billingErrorMessage && billingProfile" class="billing-fields">
+              <div>
+                <p class="billing-field-label">Address</p>
+                <p class="billing-field-value" *ngIf="billingProfile.address">
+                  {{ billingProfile.address.fullAddress }}{{ billingProfile.address.city ? ', ' + billingProfile.address.city : '' }}{{ billingProfile.address.zipCode ? ', ' + billingProfile.address.zipCode : '' }}
+                </p>
+                <p class="billing-field-value billing-field-empty" *ngIf="!billingProfile.address">
+                  Adres bilgisi eksik
+                </p>
+              </div>
+              <hr class="billing-divider" />
+              <div>
+                <p class="billing-field-label">Account Holder</p>
+                <p class="billing-field-value">{{ billingProfile.accountHolderName }}</p>
+              </div>
+            </div>
+            
+            <button 
+              *ngIf="!isBillingLoading && !billingErrorMessage" 
+              class="btn-edit-billing" 
+              (click)="openEditBillingProfile()"
+              [attr.aria-label]="billingProfile ? 'Edit billing profile' : 'Set up billing address'">
+              {{ billingProfile ? 'Edit Billing Profile' : 'Set Up Billing Address' }}
+            </button>
+          </div>
+
+          <div class="security-panel">
+            <div class="security-panel-top">
+              <div class="security-panel-icon"><span class="material-symbols-outlined">encrypted</span></div>
+              <div>
+                <h4 class="security-panel-title">Encrypted Vault</h4>
+                <p class="security-panel-status">Active Protection</p>
+              </div>
+            </div>
+            <p class="security-panel-text">Hardware-secured vault. We never store CVV codes.</p>
+          </div>
+
+          <div class="pay-watch-promo">
+            <img alt="Luxury watch"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUWmWtBFjKZmUk1DZiv7vmQMtESyBMiPMxUakHlq26rZhLCMqkD7FzUfWullmSWHTIG7ujK-Cmi3vIPUBXvwMBf0NJmfexsw2tCmN4kFiFFjID1lyVyFRJxUfE5RZFXISntUQncW8uHRIE_waDdvG8eN2O_SNZdmLGghG08V4L7YsyioojqIdE01F4WJLC8WIEEWyk8WO5Txa9nPMzvg8Sm_vxSOStauCU4ow-IH6NxL74v0I-6-w8r23ERhHCSSspScsXZh15d1Gi" />
+            <div class="pay-watch-promo-overlay">
+              <p class="pay-watch-promo-title serif">Private Procurement</p>
+              <p class="pay-watch-promo-sub">Access the Vault</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="page-footer">
+      <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+      <div class="footer-links">
+        <a class="footer-link" href="#">Provenance</a>
+        <a class="footer-link" href="#">Concierge</a>
+        <a class="footer-link" href="#">Legal</a>
+        <a class="footer-link" href="#">Sustainability</a>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<!-- Payment Method Modal -->
+<div *ngIf="showModal" class="modal-overlay" (click)="closeModal()" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <h3 class="modal-title" id="modal-title">{{ editingPaymentMethod ? 'Ödeme Yöntemini Düzenle' : 'Yeni Ödeme Yöntemi Ekle' }}</h3>
+      <button class="modal-close" (click)="closeModal()" aria-label="Close dialog">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+    </header>
+
+    <form [formGroup]="paymentForm" (ngSubmit)="submitForm()" aria-label="Payment method form">
+      <div class="modal-body">
+        <!-- Error Message in Modal -->
+        <div *ngIf="errorMessage" class="alert alert-error" role="alert" aria-live="assertive">
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <div class="form-group">
+          <label for="methodType" class="form-label">Ödeme Yöntemi Tipi *</label>
+          <input 
+            #firstInput
+            type="text" 
+            id="methodType" 
+            formControlName="methodType" 
+            [class.form-input]="true"
+            [class.input-invalid]="isFieldInvalid('methodType')"
+            [class.input-valid]="isFieldValid('methodType')"
+            placeholder="Örn: Credit Card, Digital Wallet"
+            aria-required="true"
+            [attr.aria-invalid]="isFieldInvalid('methodType')"
+            [attr.aria-describedby]="isFieldInvalid('methodType') ? 'methodType-error' : null"
+          />
+          <div *ngIf="isFieldInvalid('methodType')" class="form-error" id="methodType-error" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
+            <span>{{ getFieldError('methodType') }}</span>
+          </div>
+          <div *ngIf="isFieldValid('methodType')" class="form-success" aria-label="Valid input">
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="provider" class="form-label">Sağlayıcı</label>
+          <input 
+            type="text" 
+            id="provider" 
+            formControlName="provider" 
+            [class.form-input]="true"
+            [class.input-invalid]="isFieldInvalid('provider')"
+            [class.input-valid]="isFieldValid('provider')"
+            placeholder="Örn: Visa, MasterCard, PayPal"
+            [attr.aria-invalid]="isFieldInvalid('provider')"
+            [attr.aria-describedby]="isFieldInvalid('provider') ? 'provider-error' : null"
+          />
+          <div *ngIf="isFieldInvalid('provider')" class="form-error" id="provider-error" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
+            <span>{{ getFieldError('provider') }}</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cardToken" class="form-label">
+            Kart Token {{ editingPaymentMethod ? '' : '*' }}
+            <span class="form-hint">{{ editingPaymentMethod ? '(Sadece güncellemek istiyorsanız doldurun)' : '' }}</span>
+          </label>
+          <input 
+            type="text" 
+            id="cardToken" 
+            formControlName="cardToken" 
+            [class.form-input]="true"
+            [class.input-invalid]="isFieldInvalid('cardToken')"
+            [class.input-valid]="isFieldValid('cardToken')"
+            placeholder="Güvenli token"
+            [attr.aria-required]="!editingPaymentMethod"
+            [attr.aria-invalid]="isFieldInvalid('cardToken')"
+            [attr.aria-describedby]="isFieldInvalid('cardToken') ? 'cardToken-error' : null"
+          />
+          <div *ngIf="isFieldInvalid('cardToken')" class="form-error" id="cardToken-error" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
+            <span>{{ getFieldError('cardToken') }}</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="lastFour" class="form-label">Son 4 Hane *</label>
+            <input 
+              type="text" 
+              id="lastFour" 
+              formControlName="lastFour" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('lastFour')"
+              [class.input-valid]="isFieldValid('lastFour')"
+              placeholder="1234"
+              maxlength="4"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('lastFour')"
+              [attr.aria-describedby]="isFieldInvalid('lastFour') ? 'lastFour-error' : null"
+            />
+            <div *ngIf="isFieldInvalid('lastFour')" class="form-error" id="lastFour-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('lastFour') }}</span>
+            </div>
+            <div *ngIf="isFieldValid('lastFour')" class="form-success" aria-label="Valid input">
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="expiryDate" class="form-label">Son Kullanma Tarihi *</label>
+            <input 
+              type="text" 
+              id="expiryDate" 
+              formControlName="expiryDate" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('expiryDate')"
+              [class.input-valid]="isFieldValid('expiryDate')"
+              placeholder="MM/YYYY"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('expiryDate')"
+              [attr.aria-describedby]="isFieldInvalid('expiryDate') ? 'expiryDate-error' : null"
+            />
+            <div *ngIf="isFieldInvalid('expiryDate')" class="form-error" id="expiryDate-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('expiryDate') }}</span>
+            </div>
+            <div *ngIf="isFieldValid('expiryDate')" class="form-success" aria-label="Valid input">
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" formControlName="isDefault" aria-label="Set as default payment method" />
+            <span>Varsayılan ödeme yöntemi olarak ayarla</span>
+          </label>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModal()" [disabled]="isLoading" aria-label="Cancel">
+          İptal
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="paymentForm.invalid || isLoading" [attr.aria-label]="editingPaymentMethod ? 'Update payment method' : 'Add payment method'">
+          <span *ngIf="isLoading" class="material-symbols-outlined spinning" aria-hidden="true">progress_activity</span>
+          <span *ngIf="!isLoading">{{ editingPaymentMethod ? 'Güncelle' : 'Ekle' }}</span>
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>
+
+<!-- Confirmation Dialog -->
+<app-confirm-dialog
+  [show]="showDeleteConfirm"
+  title="Ödeme Yöntemini Sil"
+  message="Bu ödeme yöntemini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+  confirmText="Sil"
+  cancelText="İptal"
+  type="danger"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+></app-confirm-dialog>
+
+<!-- Billing Address Selection Modal -->
+<app-billing-address-modal
+  [show]="showBillingModal"
+  [editingBillingProfile]="editingBillingProfile"
+  (closed)="onBillingModalClosed()"
+  (billingAddressSet)="onBillingAddressSet($event)"
+></app-billing-address-modal>

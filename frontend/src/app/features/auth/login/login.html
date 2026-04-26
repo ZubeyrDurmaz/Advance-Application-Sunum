@@ -1,0 +1,74 @@
+<app-navbar />
+
+<!-- Main Content: Split-Screen Login -->
+<main class="login-main">
+  <!-- Left Side: Cinematic Visual -->
+  <section class="login-visual hidden lg:block">
+    <img class="login-visual-img"
+      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtEEAkpDo9QtZANQxf7beie0GvBOAi_jpIOCcxO1EBKvtJca8TXtLv88JNUf4M9-kJZeH720ZVqVzoYUaos6x_Tw4gFhYW1RjrnW29ROFf-58gzyTkpbP0P-VcsFlEciSH3UkDfY4AFB8PnZw0g8GLBXFChtKQqcH3um3BfGLxFJ0hbpyK0qpIUD4XXhlLCRhbU7ujAJ28Ckfgf5pntolJRnLzwd258KWOz1zqi-bsTfhEnnfW7pTiJBawrZVBrc4ClH13n8OQKCiy"
+      alt="Luxury Watch Movement" />
+    <div class="login-visual-tint"></div>
+    <div class="login-visual-caption">
+      <h2 class="login-visual-heading">Mastery in Every Second.</h2>
+      <p class="login-visual-subtext">
+        Access your private collection and market insights curated for the discerning enthusiast.
+      </p>
+    </div>
+  </section>
+
+  <!-- Right Side: Login Form -->
+  <section class="login-form-section">
+    <div class="login-form-wrap">
+      <div class="space-y-4">
+        <h1 class="login-heading">Welcome Back</h1>
+        <p class="login-subheading">Please identify yourself to enter the sanctuary.</p>
+      </div>
+
+      <form class="login-form" (ngSubmit)="onLogin()">
+        <!-- Email Field -->
+        <div class="form-field">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-input"
+            id="email" name="email" placeholder="curator@timeless.com" type="email" [(ngModel)]="email" />
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-field">
+          <div class="form-label-row">
+            <label class="form-label" for="password">Password</label>
+            <a class="form-forgot-link" href="#">Forgot Password?</a>
+          </div>
+          <input class="form-input"
+            id="password" name="password" placeholder="••••••••" type="password" [(ngModel)]="password" />
+        </div>
+
+        <!-- Error Message -->
+        @if (errorMessage) {
+          <p class="login-error">{{ errorMessage }}</p>
+        }
+
+        <!-- CTA Section -->
+        <div class="login-cta">
+          <button class="login-submit-btn" type="submit" [disabled]="loading">
+            {{ loading ? 'Signing in...' : 'Login' }}
+          </button>
+          <div class="login-divider">
+            <span class="login-divider-line"></span>
+            <span class="login-divider-text">or</span>
+            <span class="login-divider-line"></span>
+          </div>
+          <button class="login-create-btn"
+            type="button" (click)="onCreateAccount()" [routerLink]="['/signup']">Create an Account</button>
+        </div>
+      </form>
+
+      <!-- Security Note -->
+      <div class="login-security-note">
+        <span class="material-symbols-outlined text-sm">lock_open</span>
+        <p class="login-security-text">End-to-End Encrypted Session</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<app-footer />

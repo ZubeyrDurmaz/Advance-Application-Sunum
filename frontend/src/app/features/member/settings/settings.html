@@ -1,0 +1,131 @@
+<div class="page-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1 class="sidebar-title">Member Lounge</h1>
+      <p class="sidebar-subtitle">Private Collection</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/dashboard']"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
+      <a class="nav-link" [routerLink]="['/order-history']"><span class="material-symbols-outlined">history</span> History</a>
+      <a class="nav-link" [routerLink]="['/payments']"><span class="material-symbols-outlined">payments</span> Payments</a>
+      <a class="nav-link" [routerLink]="['/addresses']"><span class="material-symbols-outlined">home_pin</span> Addresses</a>
+      <a class="nav-link active" [routerLink]="['/settings']"><span class="material-symbols-outlined icon-filled">settings</span> Settings</a>
+    </nav>
+  </aside>
+
+  <main class="settings-main">
+    <header style="margin-bottom:4rem;">
+      <nav class="breadcrumb">
+        <a href="#">Settings</a>
+        <span class="material-symbols-outlined" style="font-size:0.75rem;">chevron_right</span>
+        <span class="breadcrumb-current">Personal Information</span>
+      </nav>
+      <h2 class="settings-heading">Account Integrity</h2>
+      <p class="settings-subtext">Manage your curatorial credentials and security preferences. Your details are encrypted within our vault.</p>
+    </header>
+
+    <div class="settings-grid">
+      <div>
+        <section style="margin-bottom:3rem;">
+          <h3 class="settings-section-title serif">Identity &amp; Contact</h3>
+          @if (errorMessage) {
+            <p style="color:#e57373;margin-bottom:1rem;font-size:0.875rem;">{{ errorMessage }}</p>
+          }
+          @if (saved) {
+            <p style="color:#81c784;margin-bottom:1rem;font-size:0.875rem;">Profile saved successfully.</p>
+          }
+          <form class="settings-form" (ngSubmit)="saveProfile()">
+            <div class="form-field">
+              <label class="form-label">Full Name</label>
+              <input class="form-input" type="text" [(ngModel)]="name" name="name" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Email Address</label>
+              <input class="form-input" type="email" [(ngModel)]="email" name="email" />
+            </div>
+            <div class="settings-actions" style="margin-top:1.5rem;">
+              <button class="btn-save" type="submit" [disabled]="saving">
+                {{ saving ? 'Saving…' : 'Save Changes' }}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section>
+          <h3 class="settings-section-title serif">Security Credentials</h3>
+          @if (passwordError) {
+            <p style="color:#e57373;margin-bottom:1rem;font-size:0.875rem;">{{ passwordError }}</p>
+          }
+          @if (passwordSaved) {
+            <p style="color:#81c784;margin-bottom:1rem;font-size:0.875rem;">Password changed successfully.</p>
+          }
+          <form class="settings-form" (ngSubmit)="changePassword()">
+            <div class="form-field">
+              <label class="form-label">Current Password</label>
+              <input class="form-input" type="password" [(ngModel)]="currentPassword" name="currentPassword" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">New Password</label>
+              <input class="form-input" type="password" [(ngModel)]="newPassword" name="newPassword" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Confirm New Password</label>
+              <input class="form-input" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" />
+            </div>
+            <div class="settings-actions" style="margin-top:1.5rem;">
+              <button class="btn-save" type="submit" [disabled]="savingPassword">
+                {{ savingPassword ? 'Changing…' : 'Change Password' }}
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <div class="settings-sidebar">
+        <div class="membership-card">
+          <div style="position:relative; z-index:1;">
+            <span class="membership-badge">Elite Tier Curator</span>
+            <h4 class="membership-title serif">Member Since 2018</h4>
+            <p class="membership-text">Priority access to the Private Vault and personal horology concierge services.</p>
+            <div class="membership-perks">
+              <div class="membership-perk">
+                <span class="material-symbols-outlined icon-filled perk-icon">workspace_premium</span>
+                <span>Insured Global Shipping</span>
+              </div>
+              <div class="membership-perk">
+                <span class="material-symbols-outlined icon-filled perk-icon">event</span>
+                <span>VVIP Event Invitations</span>
+              </div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined gear-deco">settings_suggest</span>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-avatar-wrap">
+            <img class="profile-avatar" alt="Profile"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAB6qqNUXm4VynoOwifAyFCoy6YIR0wXx0XbRlszTTbY_JalPDVRqm5cYFvbZOcUjXRjy4pZagjcTqfeH9YeaDSr-Cs95lKtYND97GMg5JwNsLo0G8Y3PNKkesRnlENR0zekrxb6XGf4pA7eo_HvfhlWHJnOf2ciIlg7Z56BcKMK2qvutZHujnwekrxOgSxMVz-jupoQ74jS5dLMxJawL58I47cf9ZgW4zQv7F24TBKL31_SvdOqXRuyqT-bE5KdhLNWKSUN9X31hKn" />
+            <button class="profile-avatar-btn"><span class="material-symbols-outlined" style="font-size:1rem;">photo_camera</span></button>
+          </div>
+          <h5 class="profile-name serif">{{ name || 'Loading...' }}</h5>
+          <p class="profile-location">Geneva, Switzerland</p>
+        </div>
+
+        <div class="security-notice">
+          <h6 class="security-notice-title">Security Notice</h6>
+          <p class="security-notice-text">Last login detected from Geneva, CH today at 10:42 AM. If this was not you, rotate your security keys immediately.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer class="page-footer">
+  <div class="footer-links">
+    <a class="footer-link" href="#">Provenance</a>
+    <a class="footer-link" href="#">Concierge</a>
+    <a class="footer-link" href="#">Legal</a>
+    <a class="footer-link" href="#">Sustainability</a>
+  </div>
+  <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+</footer>

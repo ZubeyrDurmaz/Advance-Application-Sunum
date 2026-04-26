@@ -1,0 +1,85 @@
+<main class="signup-layout">
+  <section class="signup-visual">
+    <img class="signup-visual-img"
+      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrxCL8MK8YdGbNcYMvml_Mz0NHGMbmjgJSMuG3o0aMVUJn_7IzMWCGWI2kXuzdPUsuZ39XHUY0KApGqGaWafakKmiDIuilFvvKgIdHFERuWck12gvyFvBRq2uJwB9RWIAwE0ThcEPx33o_vfyn1w6SEm9LATUs46f3le8yAf2KD81-8sbwIJTxXRa_kGiwQ8lKZYl-6SocDDRemx4dDYu4l4P0d1lhG4EiBSMv7QyB-nPA3uVd4f-4jaGkLnSmauu4YY1ONJy2nFNy"
+      alt="Luxury watch movement details" />
+    <div class="signup-visual-tint"></div>
+    <div class="signup-visual-logo">
+      <a [routerLink]="['/']" class="signup-brand">CHRONOS</a>
+    </div>
+    <div class="signup-visual-caption">
+      <h2 class="signup-visual-heading">The art of time, curated for the discerning.</h2>
+      <p class="signup-visual-subtext">Join an exclusive circle of horology enthusiasts and collectors.</p>
+    </div>
+  </section>
+
+  <section class="signup-form-section">
+    <div class="signup-form-wrap">
+      <div class="signup-mobile-brand">
+        <a [routerLink]="['/']" class="signup-brand-dark">CHRONOS</a>
+      </div>
+
+      <div class="signup-intro">
+        <h1 class="signup-heading">Join the Sanctuary</h1>
+        <p class="signup-subheading">Begin your journey into the world of exceptional timepieces.</p>
+      </div>
+
+      <form class="signup-form" (ngSubmit)="onSignup()">
+        <div class="signup-name-grid">
+          <div class="signup-field">
+            <label class="signup-label" for="first-name">First Name</label>
+            <input class="signup-input" id="first-name" name="firstName" placeholder="Julian" type="text" autocomplete="given-name" [(ngModel)]="firstName" />
+          </div>
+          <div class="signup-field">
+            <label class="signup-label" for="last-name">Last Name</label>
+            <input class="signup-input" id="last-name" name="lastName" placeholder="Vane" type="text" autocomplete="family-name" [(ngModel)]="lastName" />
+          </div>
+        </div>
+
+        <div class="signup-field">
+          <label class="signup-label" for="email">Email Address</label>
+          <input class="signup-input" id="email" name="email" placeholder="julian.vane@editorial.com" type="email" autocomplete="email" inputmode="email" [(ngModel)]="email" />
+        </div>
+
+        <div class="signup-field">
+          <label class="signup-label" for="password">Create Password</label>
+          <div class="signup-password-wrap">
+            <input class="signup-input" id="password" name="password" placeholder="••••••••••••"
+              [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" />
+            <button class="signup-toggle-password" type="button" (click)="showPassword = !showPassword">
+              <span class="material-symbols-outlined signup-eye-icon">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="signup-terms">
+          <input class="signup-checkbox" id="terms" type="checkbox" [(ngModel)]="termsAccepted" name="terms" />
+          <label class="signup-terms-label" for="terms">
+            I agree to the
+            <a class="signup-terms-link" href="#">Terms of Service</a>
+            and
+            <a class="signup-terms-link" href="#">Privacy Policy</a>.
+          </label>
+        </div>
+
+        <div class="signup-actions">
+          <button class="signup-submit-btn luxury-gradient" type="submit">Create Account</button>
+          <div class="signup-login-prompt">
+            <p class="signup-login-text">
+              Already have an account?
+              <a class="signup-login-link" [routerLink]="['/login']">Login</a>
+            </p>
+          </div>
+        </div>
+      </form>
+
+      <div class="signup-footer-note">
+        <p class="signup-copyright">© 2024 CHRONOS CURATOR. ESTABLISHED IN EXCELLENCE.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="signup-bg-deco">
+  <span class="material-symbols-outlined signup-bg-icon">stop</span>
+</div>

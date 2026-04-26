@@ -1,0 +1,188 @@
+<div class="page-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">Member Lounge</h2>
+      <p class="sidebar-subtitle">Private Collection</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/dashboard']"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+      <a class="nav-link active" [routerLink]="['/order-history']"><span class="material-symbols-outlined">history</span><span>History</span></a>
+      <a class="nav-link" [routerLink]="['/payments']"><span class="material-symbols-outlined">payments</span><span>Payments</span></a>
+      <a class="nav-link" [routerLink]="['/addresses']"><span class="material-symbols-outlined">home_pin</span><span>Addresses</span></a>
+      <a class="nav-link" [routerLink]="['/settings']"><span class="material-symbols-outlined">settings</span><span>Settings</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-status">
+        <p class="stat-label" style="font-weight:700;">Status</p>
+        <p class="sidebar-status-value">Elite Member</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="oh-main">
+    <header class="oh-header">
+      <div>
+        <h1 class="oh-heading">Acquisition History</h1>
+        <p class="oh-subtext">A permanent ledger of your horological journey. Click any row to view details.</p>
+      </div>
+      <div class="oh-actions">
+        <button class="btn-secondary"><span class="material-symbols-outlined">filter_list</span> Filter</button>
+        <button class="btn-secondary"><span class="material-symbols-outlined">download</span> Export Ledger</button>
+      </div>
+    </header>
+
+    @if (loading) {
+      <div style="padding:3rem;text-align:center;color:#888;">Loading orders...</div>
+    } @else if (errorMessage) {
+      <div style="padding:2rem;text-align:center;color:#c9a84c;">{{ errorMessage }}</div>
+    } @else if (orders.length === 0) {
+      <div style="padding:3rem;text-align:center;color:#888;">No orders found.</div>
+    } @else {
+
+      <!-- Mobile: Card Layout -->
+      @if (isMobile()) {
+        <div class="oh-table-cards">
+          @for (order of orders; track order.id) {
+            <div class="oh-card" (click)="openTracking(order)">
+              <div class="oh-card-header">
+                <div class="oh-card-header-info">
+                  <p class="watch-name serif">{{ order.name }}</p>
+                  <p class="watch-ref">{{ order.ref }}</p>
+                </div>
+              </div>
+              <div class="oh-card-body">
+                <div class="oh-card-row">
+                  <span class="oh-card-label">Date</span>
+                  <span class="oh-card-value">{{ order.date }}</span>
+                </div>
+                <div class="oh-card-row">
+                  <span class="oh-card-label">Valuation</span>
+                  <span class="oh-card-value">{{ order.value }}</span>
+                </div>
+                <div class="oh-card-row">
+                  <span class="oh-card-label">Status</span>
+                  <span class="oh-card-value">
+                    @if (order.status === 'delivered') {
+                      <span class="badge badge-delivered"><span class="badge-dot"></span> Delivered</span>
+                    } @else if (order.status === 'cancelled') {
+                      <span class="badge badge-cancelled"><span class="badge-dot"></span> Cancelled</span>
+                    } @else {
+                      <span class="badge badge-transit"><span class="badge-dot"></span> {{ order.status | titlecase }}</span>
+                    }
+                  </span>
+                </div>
+              </div>
+              @if (canCancel(order)) {
+                <div class="oh-card-actions">
+                  <button class="oh-cancel-btn" (click)="cancelOrder(order, $event)">
+                    <span class="material-symbols-outlined">cancel</span> Cancel Order
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- Desktop: Table -->
+        <div class="oh-table">
+          <div class="oh-table-head">
+            <div>Timepiece / Ref</div>
+            <div>Date</div>
+            <div>Valuation</div>
+            <div>Status</div>
+            <div>Payment</div>
+            <div></div>
+          </div>
+
+          @for (order of orders; track order.id) {
+            <div class="oh-row" (click)="openTracking(order)">
+              <div class="oh-row-watch">
+                <div>
+                  <p class="watch-name serif">{{ order.name }}</p>
+                  <p class="watch-ref">{{ order.ref }}</p>
+                </div>
+              </div>
+              <div class="oh-row-date">{{ order.date }}</div>
+              <div class="oh-row-value">{{ order.value }}</div>
+              <div>
+                @if (order.status === 'delivered') {
+                  <span class="badge badge-delivered"><span class="badge-dot"></span> Delivered</span>
+                } @else if (order.status === 'cancelled') {
+                  <span class="badge badge-cancelled"><span class="badge-dot"></span> Cancelled</span>
+                } @else {
+                  <span class="badge badge-transit"><span class="badge-dot"></span> {{ order.status | titlecase }}</span>
+                }
+              </div>
+              <div>{{ order.paymentMethod }}</div>
+              <div>
+                @if (canCancel(order)) {
+                  <button class="oh-cancel-btn-sm" (click)="cancelOrder(order, $event)" title="Cancel Order">
+                    <span class="material-symbols-outlined">cancel</span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <footer class="oh-footer">
+      <p class="footer-copy">&copy; 2024 CHRONOS. All Rights Reserved.</p>
+      <div class="oh-footer-links">
+        <a class="footer-link" href="#">Provenance</a>
+        <a class="footer-link" href="#">Concierge</a>
+        <a class="footer-link" href="#">Legal</a>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<!-- Order Detail Modal -->
+@if (selectedOrder) {
+  <div class="tracking-backdrop" (click)="closeTracking()">
+    <div class="tracking-modal" (click)="$event.stopPropagation()">
+      <div class="tracking-modal-header">
+        <div>
+          <h3 class="tracking-modal-title serif">Order Details</h3>
+          <p class="tracking-modal-sub">{{ selectedOrder.name }}</p>
+        </div>
+        <button class="tracking-close-btn" (click)="closeTracking()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div style="padding:1rem 1.5rem;">
+        <p style="color:#78716c;margin-bottom:0.5rem;">Date: {{ selectedOrder.date }}</p>
+        <p style="color:#78716c;margin-bottom:0.5rem;">Total: {{ selectedOrder.value }}</p>
+        <p style="color:#78716c;margin-bottom:0.5rem;">Payment: {{ selectedOrder.paymentMethod }}</p>
+        <p style="margin-bottom:1rem;">
+          @if (selectedOrder.status === 'delivered') {
+            <span class="badge badge-delivered"><span class="badge-dot"></span> Delivered</span>
+          } @else if (selectedOrder.status === 'cancelled') {
+            <span class="badge badge-cancelled"><span class="badge-dot"></span> Cancelled</span>
+          } @else {
+            <span class="badge badge-transit"><span class="badge-dot"></span> {{ selectedOrder.status | titlecase }}</span>
+          }
+        </p>
+
+        <h4 style="color:var(--primary);margin-bottom:0.75rem;font-size:0.875rem;letter-spacing:.05em;">ORDER ITEMS</h4>
+        @for (item of selectedOrder.items; track item.sku) {
+          <div style="border-top:1px solid rgba(231,229,220,0.3);padding:0.75rem 0;display:flex;justify-content:space-between;">
+            <div>
+              <p style="color:#1c1c19;font-size:0.9rem;">{{ item.name }}</p>
+              <p style="color:#78716c;font-size:0.75rem;">{{ item.sku }} × {{ item.qty }}</p>
+            </div>
+            <p style="color:#1c1c19;">${{ item.price.toLocaleString() }}</p>
+          </div>
+        }
+
+        @if (canCancel(selectedOrder)) {
+          <button class="oh-cancel-btn" style="width:100%;margin-top:1.5rem;" (click)="cancelOrder(selectedOrder)">
+            <span class="material-symbols-outlined">cancel</span> Cancel This Order
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,419 @@
+<app-navbar />
+
+<main class="cart-page">
+  <!-- ─── STEP 1: CART ─── -->
+  @if (checkoutStep === 'cart') {
+    <div class="cart-heading">
+      <h1 class="cart-title">Your Selection</h1>
+      <p class="cart-subtitle">Curated Horology • Shipping Worldwide</p>
+    </div>
+
+    @if (cartService.cartItems().length === 0) {
+      <div class="cart-empty">
+        <span class="material-symbols-outlined cart-empty-icon">shopping_bag</span>
+        <p class="cart-empty-title">Your selection is empty</p>
+        <p class="cart-empty-sub">Discover exceptional timepieces in our collection.</p>
+        <a [routerLink]="['/collection']" class="cart-explore-btn">Explore Collection</a>
+      </div>
+    } @else {
+      <div class="cart-layout">
+        <div class="cart-items">
+          @for (item of cartService.cartItems(); track item.slug) {
+            <div class="cart-item">
+              <div class="cart-item-image-wrap">
+                <img [src]="item.image" [alt]="item.name" class="cart-item-image" />
+              </div>
+              <div class="cart-item-details">
+                <div>
+                  <div class="cart-item-header">
+                    <h3 class="cart-item-name">{{ item.name }}</h3>
+                    <span class="cart-item-price">{{ item.priceLabel }}</span>
+                  </div>
+                  <p class="cart-item-ref">REF: {{ item.ref }}</p>
+                  <p class="cart-item-desc">{{ item.description }}</p>
+                </div>
+                <div class="cart-item-footer">
+                  <div class="qty-control">
+                    <button class="qty-btn" (click)="cartService.decrement(item.slug)">
+                      <span class="material-symbols-outlined">remove</span>
+                    </button>
+                    <span class="qty-value">{{ item.quantity }}</span>
+                    <button class="qty-btn" (click)="cartService.increment(item.slug)">
+                      <span class="material-symbols-outlined">add</span>
+                    </button>
+                  </div>
+                  <button class="remove-btn" (click)="cartService.remove(item.slug)">
+                    <span class="material-symbols-outlined">delete</span>Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+          <div class="cart-continue">
+            <a [routerLink]="['/collection']" class="continue-shopping-link">
+              <span class="material-symbols-outlined continue-shopping-icon">arrow_back</span>
+              Continue Shopping
+            </a>
+          </div>
+        </div>
+
+        <aside class="order-summary">
+          <div class="order-summary-card">
+            <h2 class="order-summary-title">Order Summary</h2>
+            <div class="order-summary-rows">
+              <div class="order-row">
+                <span class="order-row-label">Subtotal</span>
+                <span class="order-row-value">{{ formatPrice(cartService.total()) }}</span>
+              </div>
+              <div class="order-row">
+                <span class="order-row-label">Shipping</span>
+                <span class="order-shipping-value">Complimentary</span>
+              </div>
+              <div class="order-row">
+                <span class="order-row-label">Estimated Tax</span>
+                <span class="order-row-value">$0.00</span>
+              </div>
+              <div class="order-total-row">
+                <span class="order-total-label">Total</span>
+                <div class="order-total-right">
+                  <span class="order-total-amount">{{ formatPrice(cartService.total()) }}</span>
+                  <span class="order-vat-note">VAT Included where applicable</span>
+                </div>
+              </div>
+            </div>
+            <button class="checkout-btn" (click)="checkout()">Proceed to Checkout</button>
+            <div class="secure-badge">
+              <span class="material-symbols-outlined secure-badge-icon">verified_user</span>
+              <p class="secure-badge-text">Secure luxury logistics &amp; fully insured transit globally.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    }
+  }
+
+  <!-- ─── STEP 2: SHIPPING ─── -->
+  @if (checkoutStep === 'shipping') {
+    <div class="checkout-flow">
+      <div class="checkout-steps-bar">
+        <div class="step-indicator step-active"><span class="step-number">1</span><span class="step-label">Shipping</span></div>
+        <div class="step-line"></div>
+        <div class="step-indicator"><span class="step-number">2</span><span class="step-label">Payment</span></div>
+        <div class="step-line"></div>
+        <div class="step-indicator"><span class="step-number">3</span><span class="step-label">Confirm</span></div>
+      </div>
+
+      <div class="checkout-card">
+        <h2 class="checkout-card-title serif">Shipping Address</h2>
+        <p class="checkout-card-sub">Select a saved address or enter a new one.</p>
+
+        <!-- Saved Addresses -->
+        @if (savedAddresses.length > 0 && !useNewAddress) {
+          <div class="saved-cards-grid">
+            @for (addr of savedAddresses; track addr.id) {
+              <div class="saved-card" [class.saved-card--selected]="selectedAddressId === addr.id" (click)="selectAddress(addr.id)">
+                <div class="saved-card-radio">
+                  <span class="saved-card-dot" [class.saved-card-dot--active]="selectedAddressId === addr.id"></span>
+                </div>
+                <div class="saved-card-content">
+                  <p class="saved-card-title">{{ addr.addressTitle || 'Address' }}</p>
+                  <p class="saved-card-detail">{{ addr.fullAddress }}</p>
+                  <p class="saved-card-detail">{{ addr.city }}{{ addr.zipCode ? ', ' + addr.zipCode : '' }}</p>
+                  @if (addr.isDefault) {
+                    <span class="saved-card-badge">Default</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+          <button class="saved-add-new-btn" (click)="switchToNewAddress()">
+            <span class="material-symbols-outlined">add</span> Use a different address
+          </button>
+        } @else {
+          <!-- New Address Form -->
+          @if (savedAddresses.length > 0) {
+            <button class="saved-add-new-btn" style="margin-bottom:1.5rem;" (click)="useNewAddress = false">
+              <span class="material-symbols-outlined">arrow_back</span> Use a saved address
+            </button>
+          }
+          <div class="checkout-form">
+            <div class="form-row">
+              <div class="form-group full">
+                <label class="form-label">Full Name</label>
+                <input class="form-input" type="text" [(ngModel)]="shipping.fullName" placeholder="John Doe" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group full">
+                <label class="form-label">Address</label>
+                <input class="form-input" type="text" [(ngModel)]="shipping.address" placeholder="123 Luxury Ave" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">City</label>
+                <input class="form-input" type="text" [(ngModel)]="shipping.city" placeholder="New York" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">State</label>
+                <input class="form-input" type="text" [(ngModel)]="shipping.state" placeholder="NY" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Zip Code</label>
+                <input class="form-input" type="text" [(ngModel)]="shipping.zip" placeholder="10001" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input class="form-input" type="tel" [(ngModel)]="shipping.phone" placeholder="+1 (555) 123-4567" />
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="checkout-actions">
+          <button class="checkout-btn-secondary" (click)="backToCart()">
+            <span class="material-symbols-outlined">arrow_back</span> Back
+          </button>
+          <button class="checkout-btn" (click)="goToPayment()">Continue to Payment</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ─── STEP 3: PAYMENT ─── -->
+  @if (checkoutStep === 'payment') {
+    <div class="checkout-flow">
+      <div class="checkout-steps-bar">
+        <div class="step-indicator step-done"><span class="step-number">✓</span><span class="step-label">Shipping</span></div>
+        <div class="step-line step-line--done"></div>
+        <div class="step-indicator step-active"><span class="step-number">2</span><span class="step-label">Payment</span></div>
+        <div class="step-line"></div>
+        <div class="step-indicator"><span class="step-number">3</span><span class="step-label">Confirm</span></div>
+      </div>
+
+      <div class="checkout-layout">
+        <div class="checkout-card">
+          <h2 class="checkout-card-title serif">Payment Details</h2>
+          <p class="checkout-card-sub">Select a saved payment method or enter new card details.</p>
+
+          @if (checkoutError) {
+            <div class="checkout-error">
+              <span class="material-symbols-outlined">error</span>
+              {{ checkoutError }}
+            </div>
+          }
+
+          <!-- Saved Payment Methods -->
+          @if (savedPayments.length > 0 && !useNewPayment) {
+            <div class="saved-cards-grid">
+              @for (pm of savedPayments; track pm.id) {
+                <div class="saved-card" [class.saved-card--selected]="selectedPaymentId === pm.id" (click)="selectPayment(pm.id)">
+                  <div class="saved-card-radio">
+                    <span class="saved-card-dot" [class.saved-card-dot--active]="selectedPaymentId === pm.id"></span>
+                  </div>
+                  <div class="saved-card-icon">
+                    <span class="material-symbols-outlined">{{ paymentIcon(pm) }}</span>
+                  </div>
+                  <div class="saved-card-content">
+                    <p class="saved-card-title">{{ pm.provider || pm.methodType }}</p>
+                    <p class="saved-card-detail">•••• •••• •••• {{ pm.lastFour || '****' }}</p>
+                    @if (pm.expiryDate) {
+                      <p class="saved-card-detail">Expires {{ pm.expiryDate }}</p>
+                    }
+                    @if (pm.isDefault) {
+                      <span class="saved-card-badge">Default</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+            <button class="saved-add-new-btn" (click)="switchToNewPayment()">
+              <span class="material-symbols-outlined">add</span> Use a different card
+            </button>
+          } @else {
+            <!-- New Payment Form -->
+            @if (savedPayments.length > 0) {
+              <button class="saved-add-new-btn" style="margin-bottom:1.5rem;" (click)="useNewPayment = false">
+                <span class="material-symbols-outlined">arrow_back</span> Use a saved card
+              </button>
+            }
+
+            <div class="payment-methods">
+              <button class="payment-method" [class.payment-method--active]="payment.method === 'Credit Card'" (click)="payment.method = 'Credit Card'">
+                <span class="material-symbols-outlined">credit_card</span> Credit Card
+              </button>
+              <button class="payment-method" [class.payment-method--active]="payment.method === 'Debit Card'" (click)="payment.method = 'Debit Card'">
+                <span class="material-symbols-outlined">account_balance</span> Debit Card
+              </button>
+              <button class="payment-method" [class.payment-method--active]="payment.method === 'Wire Transfer'" (click)="payment.method = 'Wire Transfer'">
+                <span class="material-symbols-outlined">swap_horiz</span> Wire Transfer
+              </button>
+            </div>
+
+            <div class="checkout-form">
+              <div class="form-row">
+                <div class="form-group full">
+                  <label class="form-label">Card Number</label>
+                  <input class="form-input form-input--card" type="text" [(ngModel)]="payment.cardNumber"
+                    placeholder="4242 4242 4242 4242" maxlength="19" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group full">
+                  <label class="form-label">Name on Card</label>
+                  <input class="form-input" type="text" [(ngModel)]="payment.cardName" placeholder="John Doe" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Expiry Date</label>
+                  <input class="form-input" type="text" [(ngModel)]="payment.expiry" placeholder="MM/YY" maxlength="5" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CVV</label>
+                  <input class="form-input" type="password" [(ngModel)]="payment.cvv" placeholder="•••" maxlength="4" />
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Selected Address Summary -->
+          @if (!useNewAddress && getSelectedAddress(); as addr) {
+            <div class="checkout-selected-summary">
+              <span class="material-symbols-outlined">location_on</span>
+              <div>
+                <p class="checkout-summary-title">Ship to</p>
+                <p class="checkout-summary-detail">{{ addr.fullAddress }}, {{ addr.city }}</p>
+              </div>
+              <button class="checkout-change-btn" (click)="backToShipping()">Change</button>
+            </div>
+          }
+
+          <div class="checkout-actions">
+            <button class="checkout-btn-secondary" (click)="backToShipping()">
+              <span class="material-symbols-outlined">arrow_back</span> Back
+            </button>
+            <button class="checkout-btn" (click)="processPayment()">
+              <span class="material-symbols-outlined">lock</span>
+              Pay {{ formatPrice(checkoutTotal) }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="checkout-summary-sidebar">
+          <h3 class="checkout-sidebar-title serif">Order Review</h3>
+          @for (item of checkoutItems; track item.slug) {
+            <div class="checkout-sidebar-item">
+              <div>
+                <p class="checkout-sidebar-name">{{ item.name }}</p>
+                <p class="checkout-sidebar-qty">Qty: {{ item.quantity }}</p>
+              </div>
+              <p class="checkout-sidebar-price">{{ formatPrice(item.price * item.quantity) }}</p>
+            </div>
+          }
+          <div class="checkout-sidebar-total">
+            <span>Total</span>
+            <span class="checkout-sidebar-total-amount">{{ formatPrice(checkoutTotal) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ─── STEP 4: PROCESSING ─── -->
+  @if (checkoutStep === 'processing') {
+    <div class="processing-state">
+      <div class="processing-spinner"></div>
+      <h2 class="processing-title serif">Processing Payment</h2>
+      <p class="processing-sub">Securely authorizing your transaction…</p>
+      <div class="processing-steps">
+        <div class="processing-step processing-step--done">
+          <span class="material-symbols-outlined">check_circle</span> Verifying card details
+        </div>
+        <div class="processing-step processing-step--active">
+          <span class="material-symbols-outlined">sync</span> Authorizing payment
+        </div>
+        <div class="processing-step">
+          <span class="material-symbols-outlined">inventory</span> Reserving inventory
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ─── STEP 5: SUCCESS ─── -->
+  @if (checkoutStep === 'success' && completedOrder) {
+    <div class="success-state">
+      <div class="success-icon-wrap">
+        <span class="material-symbols-outlined success-icon">check_circle</span>
+      </div>
+      <h2 class="success-title serif">Order Confirmed</h2>
+      <p class="success-sub">Thank you for your acquisition. Your order has been placed successfully.</p>
+
+      <div class="success-card">
+        <div class="success-row">
+          <span class="success-label">Order ID</span>
+          <span class="success-value">{{ completedOrder.id.substring(0, 8).toUpperCase() }}</span>
+        </div>
+        <div class="success-row">
+          <span class="success-label">Status</span>
+          <span class="success-badge">Pending</span>
+        </div>
+        <div class="success-row">
+          <span class="success-label">Payment</span>
+          <span class="success-value">{{ completedOrder.paymentMethod }}</span>
+        </div>
+        <div class="success-row">
+          <span class="success-label">Total</span>
+          <span class="success-value success-total">{{ formatPrice(completedOrder.grandTotal) }}</span>
+        </div>
+
+        <div class="success-items-label">ITEMS</div>
+        @for (item of completedOrder.items; track item.id) {
+          <div class="success-item">
+            <div>
+              <p class="success-item-name">{{ item.productName }}</p>
+              <p class="success-item-sku">{{ item.productSku }} × {{ item.quantity }}</p>
+            </div>
+            <p class="success-item-price">{{ formatPrice(item.price) }}</p>
+          </div>
+        }
+      </div>
+
+      <div class="success-actions">
+        <button class="checkout-btn" (click)="goToOrders()">View Order History</button>
+        <a [routerLink]="['/collection']" class="checkout-btn-secondary">Continue Shopping</a>
+      </div>
+    </div>
+  }
+</main>
+
+<app-footer />
+
+<!-- Auth/Role Prompt Modal -->
+@if (showPrompt) {
+  <div class="cart-prompt-backdrop" (click)="closePrompt()">
+    <div class="cart-prompt-modal" (click)="$event.stopPropagation()">
+      <div class="cart-prompt-header">
+        <h3 class="cart-prompt-title">Action Required</h3>
+        <button class="cart-prompt-close" (click)="closePrompt()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="cart-prompt-body">
+        @if (!isAuthenticated) {
+          <span class="material-symbols-outlined cart-prompt-icon">lock</span>
+        } @else {
+          <span class="material-symbols-outlined cart-prompt-icon">block</span>
+        }
+        <p class="cart-prompt-message">{{ promptMessage }}</p>
+      </div>
+      @if (!isAuthenticated) {
+        <button class="checkout-btn" (click)="goToLogin()">Sign In</button>
+      }
+      <button class="cart-prompt-cancel" (click)="closePrompt()">Close</button>
+    </div>
+  </div>
+}

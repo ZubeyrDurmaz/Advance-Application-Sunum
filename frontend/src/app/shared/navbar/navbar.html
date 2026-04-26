@@ -1,0 +1,101 @@
+<nav class="nav-bar">
+  <!-- Screen reader live region: announces mobile menu open/close state -->
+  <div class="sr-only" aria-live="polite" aria-atomic="true">{{ menuStatusMessage() }}</div>
+
+  <div class="nav-inner">
+    <div class="nav-left">
+      <!-- Hamburger menu button (visible only on mobile) -->
+      <button 
+        class="nav-hamburger" 
+        (click)="toggleMobileMenu()" 
+        [attr.aria-expanded]="mobileMenuOpen()"
+        aria-controls="nav-mobile-menu"
+        aria-label="Toggle mobile menu">
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
+      
+      <a [routerLink]="['/']" class="nav-brand">CHRONOS</a>
+      
+      <!-- Desktop navigation links (visible on tablet/desktop) -->
+      <div class="nav-links">
+        <a [routerLink]="['/collection']" routerLinkActive="nav-link--active" class="nav-link">Our Collection</a>
+        <a [routerLink]="['/deals']" routerLinkActive="nav-link--active" class="nav-link">Deals</a>
+        <a [routerLink]="['/chronos-ai']" routerLinkActive="nav-link--active" class="nav-link">Chronos AI</a>
+      </div>
+    </div>
+    
+    <!-- Cart badge and user avatar (visible on all viewport sizes) -->
+    <div class="nav-actions">
+      <a [routerLink]="['/cart']" class="nav-icon-link" [attr.aria-label]="cartAriaLabel()">
+        <span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span>
+        @if (cartService.itemCount() > 0) {
+          <span class="cart-badge" aria-hidden="true">{{ cartService.itemCount() }}</span>
+        }
+      </a>
+
+      @if (auth.isLoggedIn()) {
+        <div class="nav-avatar-wrap">
+          <button class="nav-avatar"
+            (click)="dropdownOpen = !dropdownOpen; $event.stopPropagation()"
+            [attr.aria-expanded]="dropdownOpen"
+            [attr.aria-label]="'Account menu for ' + userName()">
+            {{ userInitials() }}
+          </button>
+          @if (dropdownOpen) {
+            <div class="nav-dropdown">
+              <div class="nav-dropdown-header">
+                <p class="nav-dropdown-name">{{ userName() }}</p>
+                <p class="nav-dropdown-role">{{ userRole() }}</p>
+              </div>
+              <a class="nav-dropdown-item" [routerLink]="[dashboardRoute]" (click)="dropdownOpen = false">
+                <span class="material-symbols-outlined">dashboard</span> My Dashboard
+              </a>
+              <button class="nav-dropdown-item nav-dropdown-logout" (click)="logout()">
+                <span class="material-symbols-outlined">logout</span> Sign Out
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <a [routerLink]="['/login']" class="nav-icon-link">
+          <span class="material-symbols-outlined">person</span>
+        </a>
+      }
+    </div>
+  </div>
+  <div class="nav-divider"></div>
+  
+  <!-- Mobile menu overlay (slides in from left) -->
+  <div 
+    class="nav-mobile-menu" 
+    id="nav-mobile-menu"
+    [class.nav-mobile-menu--open]="mobileMenuOpen()"
+    role="dialog"
+    [attr.aria-modal]="mobileMenuOpen()"
+    [attr.aria-hidden]="!mobileMenuOpen()"
+    aria-label="Mobile navigation menu">
+    <div class="nav-mobile-header">
+      <span class="nav-mobile-title">Menu</span>
+      <button class="nav-mobile-close" (click)="toggleMobileMenu()" aria-label="Close mobile menu">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+    </div>
+    
+    <nav class="nav-mobile-links" aria-label="Mobile navigation">
+      <a [routerLink]="['/collection']" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="toggleMobileMenu()">
+        Our Collection
+      </a>
+      <a [routerLink]="['/deals']" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="toggleMobileMenu()">
+        Deals
+      </a>
+      <a [routerLink]="['/chronos-ai']" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="toggleMobileMenu()">
+        Chronos AI
+      </a>
+    </nav>
+  </div>
+  
+  <!-- Mobile menu backdrop overlay -->
+  @if (mobileMenuOpen()) {
+    <div class="nav-mobile-backdrop" (click)="toggleMobileMenu()"></div>
+  }
+</nav>

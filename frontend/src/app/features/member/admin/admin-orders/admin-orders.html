@@ -1,0 +1,120 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Admin Panel</h3>
+      <p class="sidebar-subtitle">System Control</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/admin']"><span class="material-symbols-outlined">admin_panel_settings</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/admin/stores']"><span class="material-symbols-outlined">storefront</span><span>Stores</span></a>
+      <a class="nav-link" [routerLink]="['/admin/users']"><span class="material-symbols-outlined">manage_accounts</span><span>Users</span></a>
+      <a class="nav-link active" [routerLink]="['/admin/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link" [routerLink]="['/admin/products']"><span class="material-symbols-outlined">inventory_2</span><span>Products</span></a>
+      <a class="nav-link" [routerLink]="['/admin/discounts']"><span class="material-symbols-outlined">loyalty</span><span>Discounts</span></a>
+      <a class="nav-link" [routerLink]="['/admin/analytics']"><span class="material-symbols-outlined">monitoring</span><span>Analytics</span></a>
+      <a class="nav-link" [routerLink]="['/admin/config']"><span class="material-symbols-outlined">tune</span><span>Config</span></a>
+    </nav>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <span class="section-label">Order Management</span>
+      <h1 class="corp-heading">All Platform Orders</h1>
+      <p class="corp-subtext">View and manage orders across all stores. Filter by status, store, or search for specific orders.</p>
+    </header>
+
+    @if (loading) {
+      <p style="color:#888;padding:2rem;">Loading orders…</p>
+    } @else if (errorMessage) {
+      <p style="color:#e57373;padding:2rem;">{{ errorMessage }}</p>
+    } @else {
+
+      <!-- Summary KPIs -->
+      <div class="admin-order-kpis">
+        <div class="kpi-card">
+          <p class="stat-label">Total Orders</p>
+          <p class="kpi-value serif">{{ filteredOrders.length }}</p>
+        </div>
+        <div class="kpi-card">
+          <p class="stat-label">Total Revenue</p>
+          <p class="kpi-value serif">{{ formatPrice(totalRevenue) }}</p>
+        </div>
+        <div class="kpi-card">
+          <p class="stat-label">Active Stores</p>
+          <p class="kpi-value serif">{{ storeNames.length }}</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="admin-order-filters">
+        <div class="filter-group">
+          <span class="material-symbols-outlined filter-icon">search</span>
+          <input
+            type="text"
+            class="filter-input"
+            placeholder="Search by ID, customer, or store…"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="applyFilters()"
+          />
+        </div>
+        <select class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
+          <option value="">All Statuses</option>
+          @for (s of statuses; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+        <select class="filter-select" [(ngModel)]="storeFilter" (ngModelChange)="applyFilters()">
+          <option value="">All Stores</option>
+          @for (name of storeNames; track name) {
+            <option [value]="name">{{ name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Orders Table -->
+      @if (filteredOrders.length === 0) {
+        <div class="admin-order-empty">
+          <span class="material-symbols-outlined">inbox</span>
+          <p>No orders match your filters.</p>
+        </div>
+      } @else {
+        <div class="admin-order-table-wrap">
+          <div class="admin-order-head">
+            <span>Order ID</span>
+            <span>Customer</span>
+            <span>Store</span>
+            <span>Date</span>
+            <span>Items</span>
+            <span>Amount</span>
+            <span>Status</span>
+            <span>Action</span>
+          </div>
+          @for (o of filteredOrders; track o.id) {
+            <div class="admin-order-row">
+              <span class="admin-order-id">{{ o.id | slice:0:8 }}…</span>
+              <div class="admin-order-customer">
+                <p class="admin-customer-name">{{ o.customerName ?? '—' }}</p>
+                <p class="admin-customer-email">{{ o.customerEmail ?? '' }}</p>
+              </div>
+              <span class="admin-order-store">{{ o.storeName ?? '—' }}</span>
+              <span class="admin-order-date">{{ formatDate(o.orderDate) }}</span>
+              <span class="admin-order-items">{{ o.items?.length ?? 0 }}</span>
+              <span class="admin-order-amount">{{ formatPrice(o.grandTotal) }}</span>
+              <span [class]="getStatusClass(o.status)">{{ o.status | lowercase }}</span>
+              <select class="status-select" [ngModel]="o.status" (ngModelChange)="updateStatus(o.id, $event)">
+                @for (s of statuses; track s) {
+                  <option [value]="s">{{ s }}</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+      }
+    }
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">&copy; 2024 CHRONOS. All Rights Reserved.</p>
+</footer>

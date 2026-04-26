@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Grid Utilities Demo - CHRONOS</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Demo-specific styles */
+    .demo-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .demo-section {
+      margin-bottom: 4rem;
+    }
+    
+    .demo-title {
+      font-family: 'Noto Serif', serif;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--on-surface);
+    }
+    
+    .demo-description {
+      color: var(--on-surface-variant);
+      margin-bottom: 2rem;
+      font-size: 0.875rem;
+    }
+    
+    .demo-item {
+      background: white;
+      border: 1px solid var(--outline-variant);
+      border-radius: 0.5rem;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 150px;
+      font-weight: 600;
+      color: var(--on-surface-variant);
+    }
+    
+    .demo-form-field {
+      background: white;
+      border: 1px solid var(--outline-variant);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: var(--on-surface-variant);
+    }
+    
+    .viewport-indicator {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport-indicator">
+    <span id="viewport-size"></span>
+  </div>
+
+  <div class="page-main">
+    <div class="demo-container">
+      <header style="margin-bottom: 3rem;">
+        <h1 style="font-family: 'Noto Serif', serif; font-size: 3rem; margin-bottom: 0.5rem;">
+          Responsive Grid Utilities Demo
+        </h1>
+        <p style="color: var(--on-surface-variant); font-size: 1.125rem;">
+          Resize your browser window to see the responsive behavior in action
+        </p>
+      </header>
+
+      <!-- Product Grid Demo -->
+      <section class="demo-section">
+        <h2 class="demo-title">Product Grid</h2>
+        <p class="demo-description">
+          1 column on mobile → 2 columns on tablet (≥768px) → 4 columns on desktop (≥1024px)
+        </p>
+        <div class="product-grid">
+          <div class="demo-item">Product 1</div>
+          <div class="demo-item">Product 2</div>
+          <div class="demo-item">Product 3</div>
+          <div class="demo-item">Product 4</div>
+          <div class="demo-item">Product 5</div>
+          <div class="demo-item">Product 6</div>
+          <div class="demo-item">Product 7</div>
+          <div class="demo-item">Product 8</div>
+        </div>
+      </section>
+
+      <!-- Bento Grid Demo -->
+      <section class="demo-section">
+        <h2 class="demo-title">Bento Grid</h2>
+        <p class="demo-description">
+          1 column on mobile → 2 columns on tablet (≥768px) → 3 columns on desktop (≥1024px)
+        </p>
+        <div class="bento-grid">
+          <div class="demo-item">Dashboard Card 1</div>
+          <div class="demo-item">Dashboard Card 2</div>
+          <div class="demo-item">Dashboard Card 3</div>
+          <div class="demo-item">Dashboard Card 4</div>
+          <div class="demo-item">Dashboard Card 5</div>
+          <div class="demo-item">Dashboard Card 6</div>
+        </div>
+      </section>
+
+      <!-- Form Grid Demo -->
+      <section class="demo-section">
+        <h2 class="demo-title">Form Grid</h2>
+        <p class="demo-description">
+          1 column on mobile → 2 columns on tablet/desktop (≥768px)
+        </p>
+        <div class="form-grid">
+          <div class="demo-form-field">First Name</div>
+          <div class="demo-form-field">Last Name</div>
+          <div class="demo-form-field">Email</div>
+          <div class="demo-form-field">Phone</div>
+          <div class="demo-form-field">Address</div>
+          <div class="demo-form-field">City</div>
+        </div>
+      </section>
+
+      <!-- Section Spacing Demo -->
+      <section class="demo-section">
+        <h2 class="demo-title">Section Spacing Utilities</h2>
+        <p class="demo-description">
+          Responsive spacing utilities that scale with viewport size
+        </p>
+        
+        <div class="section" style="background: var(--surface-container); padding: 2rem; border-radius: 0.5rem;">
+          <h3 style="margin-bottom: 1rem;">Section (.section)</h3>
+          <p>This section has responsive bottom margin using var(--space-2xl) on mobile and var(--space-3xl) on tablet+</p>
+        </div>
+
+        <div class="section-sm" style="background: var(--surface-container); padding: 2rem; border-radius: 0.5rem;">
+          <h3 style="margin-bottom: 1rem;">Small Section (.section-sm)</h3>
+          <p>This section has smaller responsive bottom margin using var(--space-lg) on mobile and var(--space-xl) on tablet+</p>
+        </div>
+
+        <div class="section-lg" style="background: var(--surface-container); padding: 2rem; border-radius: 0.5rem;">
+          <h3 style="margin-bottom: 1rem;">Large Section (.section-lg)</h3>
+          <p>This section has larger responsive bottom margin using var(--space-3xl) on mobile and clamp(4rem, 6vw, 5rem) on tablet+</p>
+        </div>
+      </section>
+
+      <!-- Page Main Padding Demo -->
+      <section class="demo-section">
+        <h2 class="demo-title">Page Main Padding</h2>
+        <p class="demo-description">
+          The .page-main container (this entire page) uses fluid spacing variables for responsive padding
+        </p>
+        <div style="background: var(--surface-container); padding: 2rem; border-radius: 0.5rem;">
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Mobile:</strong> padding: var(--space-lg) var(--space-md)
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Tablet (≥768px):</strong> padding: var(--space-2xl) var(--space-xl)
+            </li>
+            <li>
+              <strong>Desktop (≥1024px):</strong> padding: var(--space-3xl) var(--space-2xl)
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Update viewport indicator
+    function updateViewportIndicator() {
+      const width = window.innerWidth;
+      const indicator = document.getElementById('viewport-size');
+      
+      let breakpoint = 'Mobile';
+      if (width >= 1024) {
+        breakpoint = 'Desktop';
+      } else if (width >= 768) {
+        breakpoint = 'Tablet';
+      }
+      
+      indicator.textContent = `${breakpoint} (${width}px)`;
+    }
+    
+    updateViewportIndicator();
+    window.addEventListener('resize', updateViewportIndicator);
+  </script>
+</body>
+</html>

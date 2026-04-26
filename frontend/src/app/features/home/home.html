@@ -1,0 +1,113 @@
+<app-navbar />
+
+<main aria-label="Home page content">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-bg">
+      <img class="hero-bg-img"
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuk4ajTXLcq6AtOkezsbjdqwS4fdRII474N7aopXh1LSPNEciuoS_-LUzoIFnCZEclhhrm2YbgrCINhJvLvj3lD_Ojw20jz9iniNuAaJTYlMIp1Bkhj0WxQU89Xxe-Pm1qMAhbo6s-tbKlVbLJ2t4LtbIWaDTwvF_-kP1uu8Hpd-zYyE-2sCvyh1SgxXruGitt93eWYBSgmy_gCoiH12slTrQqg4jjZpbZICpwG1izS3XjU_VcXcTXuEwcgoCp_h3168z6RJNU8-1w"
+        alt="Macro close-up of a gold tourbillon watch movement"
+        width="1920" height="1080"
+        fetchpriority="high" />
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-text">
+        <span class="hero-eyebrow">Horological Mastery</span>
+        <h1 class="hero-title">The Art of Precision</h1>
+        <p class="hero-body">
+          Curating rare timepieces that bridge the gap between engineering perfection and aesthetic grace. A legacy worn on the wrist.
+        </p>
+        <div class="hero-cta">
+          <button class="btn-primary" (click)="onDiscoverMore()">
+            Discover More
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+          <button class="btn-secondary" (click)="onViewHeritage()">View Heritage</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature Bento Grid -->
+  <section class="bento-section">
+    <div class="bento-grid">
+      <div class="bento-text-card">
+        <div>
+          <h2 class="bento-philosophy-title">The Curator's Philosophy</h2>
+          <p class="bento-philosophy-body">
+            Every watch we select undergoes a rigorous authentication process by our master watchmakers. We don't just sell time; we preserve history.
+          </p>
+        </div>
+        <div class="bento-promise">
+          <div class="bento-promise-label">
+            <span class="bento-promise-line"></span>Our Promise
+          </div>
+        </div>
+      </div>
+      <div class="bento-image-card">
+        <img class="bento-image" appLazyLoad
+          [src]="'https://lh3.googleusercontent.com/aida-public/AB6AXuAUoIkUD6pKwcEo2u2L3tU3J3yGNIMNjrotinuyXjxWEsLVP-OxjxAC1t5Y0juC9z4hRd7M2SQaV7nY10Tdk7xZsGP27vf2Lm6ec1q1U_SBUzVQ6svTlm8JVVo4I5wonwEvaYWYhmmJP2vGbh04PhzQh34Y1IqcffRQTS8xH_rsZPPRvS5MjVBtppiC34RYxsWy3p-gtUZJF5JmCnxVMHCS_Z086qu34RSGp3083Kfcwg5GSsT43J2SeI5KzyLNqRBIf2-w1yrFPQTu'"
+          alt="Elegant luxury watch on a beige surface" />
+        <div class="bento-image-caption">
+          <span class="bento-caption-label">New Arrival</span>
+          <h3 class="font-headline text-xl">The Alpine Chronograph</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products -->
+  <section class="products-section">
+    <div class="products-header">
+      <div>
+        <h2 class="products-heading">Limited Offers</h2>
+        <p class="products-subtext">Exceptional rarity. Curated for the discerning eye.</p>
+      </div>
+      <a class="view-all-link" [routerLink]="['/collection']">View All Collection</a>
+    </div>
+    <div class="product-grid">
+      @for (product of products; track product.name) {
+        <div class="product-card group cursor-pointer" (click)="onQuickView(product)" [routerLink]="['/product', product.slug]">
+          <div class="product-image-wrap">
+            <img class="product-image" appLazyLoad
+              [src]="product.image" [alt]="product.name" />
+            @if (product.limited) {
+              <div class="product-badge-wrap">
+                <span class="product-badge">Limited</span>
+              </div>
+            }
+            <div class="product-hover-overlay">
+              <button class="quick-view-btn">Quick View</button>
+            </div>
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">{{ product.name }}</h3>
+            <p class="font-label text-sm uppercase tracking-widest text-on-surface-variant mb-4">{{ product.subtitle }}</p>
+            <span class="product-price">{{ product.price }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="newsletter-section">
+    <div class="newsletter-deco" aria-hidden="true">
+      <span class="newsletter-deco-letter">C</span>
+    </div>
+    <div class="newsletter-content">
+        <h2 class="font-headline text-4xl mb-8">Join the Private Circle</h2>
+      <p class="newsletter-body">
+        Receive first access to rare vintage acquisitions, limited edition collaborations, and expert horological essays.
+      </p>
+      <form class="newsletter-form" (ngSubmit)="onNewsletterSubmit()" aria-label="Newsletter subscription">
+        <input class="newsletter-input"
+          placeholder="Your email address" type="email" [(ngModel)]="email" name="email" />
+        <button type="submit" class="newsletter-btn">Join Now</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<app-footer />

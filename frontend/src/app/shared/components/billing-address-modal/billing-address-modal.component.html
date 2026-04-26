@@ -1,0 +1,537 @@
+<div *ngIf="show" class="modal-overlay" (click)="onOverlayClick()" role="dialog" aria-modal="true" aria-labelledby="billing-modal-title">
+  <div class="modal-content billing-modal" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <h3 class="modal-title" id="billing-modal-title">
+        {{ currentView === 'select' ? 'Fatura Adresi Seç' : 
+           currentView === 'create' ? 'Yeni Fatura Adresi Oluştur' : 
+           'Fatura Profili Düzenle' }}
+      </h3>
+      <button class="modal-close" (click)="closeModal()" aria-label="Close dialog">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+    </header>
+
+    <!-- View Toggle Buttons (only show when not in edit mode) -->
+    <div *ngIf="!editingBillingProfile" class="view-toggle" role="tablist" aria-label="Billing address options">
+      <button 
+        type="button"
+        class="view-toggle-btn"
+        [class.active]="currentView === 'select'"
+        (click)="switchToSelectView()"
+        role="tab"
+        [attr.aria-selected]="currentView === 'select'"
+        aria-controls="select-view">
+        <span class="material-symbols-outlined" aria-hidden="true">list</span>
+        Mevcut Adres Seç
+      </button>
+      <button 
+        type="button"
+        class="view-toggle-btn"
+        [class.active]="currentView === 'create'"
+        (click)="switchToCreateView()"
+        role="tab"
+        [attr.aria-selected]="currentView === 'create'"
+        aria-controls="create-view">
+        <span class="material-symbols-outlined" aria-hidden="true">add_location</span>
+        Yeni Adres Oluştur
+      </button>
+    </div>
+
+    <!-- Select Address View -->
+    <form *ngIf="currentView === 'select'" [formGroup]="billingForm" (ngSubmit)="submitForm()" aria-label="Billing address selection form" id="select-view" role="tabpanel">
+      <div class="modal-body">
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="alert alert-error" role="alert" aria-live="assertive">
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <!-- Address Selection Section -->
+        <div class="form-section">
+          <h4 class="form-section-title">Adres Seçin</h4>
+          
+          <!-- Loading state for addresses -->
+          <div *ngIf="isLoadingAddresses" class="address-loading" role="status" aria-live="polite" aria-label="Loading addresses">
+            <span class="material-symbols-outlined spinning" aria-hidden="true">progress_activity</span>
+            <p>Adresler yükleniyor...</p>
+          </div>
+
+          <!-- Empty state for addresses -->
+          <div *ngIf="!isLoadingAddresses && availableAddresses.length === 0" class="address-empty" role="status">
+            <span class="material-symbols-outlined" aria-hidden="true">location_off</span>
+            <p>Henüz kayıtlı adres bulunmuyor</p>
+            <p class="address-empty-subtitle">Yeni bir adres oluşturun veya önce adres ekleyin</p>
+            <button type="button" class="btn-create-address" (click)="switchToCreateView()" aria-label="Create new address">
+              <span class="material-symbols-outlined" aria-hidden="true">add_location</span>
+              Yeni Adres Oluştur
+            </button>
+          </div>
+
+          <!-- Address List -->
+          <div *ngIf="!isLoadingAddresses && availableAddresses.length > 0" class="address-list" role="radiogroup" aria-label="Select billing address">
+            <div *ngFor="let address of availableAddresses; trackBy: trackByAddressId" 
+                 class="address-item" 
+                 [class.selected]="selectedAddressId === address.id"
+                 (click)="selectAddress(address.id)"
+                 role="radio"
+                 [attr.aria-checked]="selectedAddressId === address.id"
+                 [attr.aria-labelledby]="'address-' + address.id + '-label'"
+                 tabindex="0"
+                 (keydown.enter)="selectAddress(address.id)"
+                 (keydown.space)="$event.preventDefault(); selectAddress(address.id)">
+              
+              <div class="address-radio">
+                <input type="radio" 
+                       [id]="'address-' + address.id"
+                       [value]="address.id"
+                       [checked]="selectedAddressId === address.id"
+                       (change)="selectAddress(address.id)"
+                       aria-hidden="true"
+                       tabindex="-1">
+                <span class="radio-checkmark"></span>
+              </div>
+              
+              <div class="address-content">
+                <div class="address-header">
+                  <h5 class="address-title" [id]="'address-' + address.id + '-label'">
+                    {{ address.addressTitle || 'Adres' }}
+                    <span *ngIf="address.isDefault" class="address-default-badge" aria-label="Default address">Varsayılan</span>
+                  </h5>
+                </div>
+                <p class="address-details">
+                  {{ address.fullAddress }}{{ address.city ? ', ' + address.city : '' }}{{ address.zipCode ? ', ' + address.zipCode : '' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Holder Name Section -->
+        <div class="form-section">
+          <div class="form-group">
+            <label for="accountHolderName" class="form-label">Hesap Sahibi Adı *</label>
+            <input 
+              #firstInput
+              type="text" 
+              id="accountHolderName" 
+              formControlName="accountHolderName" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('accountHolderName', 'billing')"
+              [class.input-valid]="isFieldValid('accountHolderName', 'billing')"
+              placeholder="Fatura için hesap sahibi adını girin"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('accountHolderName', 'billing')"
+              [attr.aria-describedby]="isFieldInvalid('accountHolderName', 'billing') ? 'accountHolderName-error' : 'accountHolderName-help'"
+            />
+            <div id="accountHolderName-help" class="form-help">
+              Bu isim fatura ve ödeme işlemlerinde kullanılacaktır
+            </div>
+            <div *ngIf="isFieldInvalid('accountHolderName', 'billing')" class="form-error" id="accountHolderName-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('accountHolderName', 'billing') }}</span>
+            </div>
+            <div *ngIf="isFieldValid('accountHolderName', 'billing')" class="form-success" aria-label="Valid input">
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected Address Preview -->
+        <div *ngIf="selectedAddressId && getSelectedAddress()" class="selected-address-preview">
+          <h4 class="preview-title">Seçilen Adres</h4>
+          <div class="preview-content">
+            <div class="preview-address">
+              <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+              <div>
+                <p class="preview-address-title">{{ getSelectedAddress()?.addressTitle || 'Adres' }}</p>
+                <p class="preview-address-details">{{ getSelectedAddress()?.fullAddress }}{{ getSelectedAddress()?.city ? ', ' + getSelectedAddress()?.city : '' }}{{ getSelectedAddress()?.zipCode ? ', ' + getSelectedAddress()?.zipCode : '' }}</p>
+              </div>
+            </div>
+            <div *ngIf="billingForm.get('accountHolderName')?.value" class="preview-account-holder">
+              <span class="material-symbols-outlined" aria-hidden="true">person</span>
+              <div>
+                <p class="preview-label">Hesap Sahibi</p>
+                <p class="preview-value">{{ billingForm.get('accountHolderName')?.value }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModal()" [disabled]="isLoading" aria-label="Cancel">
+          İptal
+        </button>
+        <button type="submit" 
+                class="btn-primary" 
+                [disabled]="billingForm.invalid || !selectedAddressId || isLoading" 
+                aria-label="Set billing address">
+          <span *ngIf="isLoading" class="material-symbols-outlined spinning" aria-hidden="true">progress_activity</span>
+          <span *ngIf="!isLoading">Fatura Adresi Olarak Ayarla</span>
+        </button>
+      </footer>
+    </form>
+
+    <!-- Create Address View -->
+    <form *ngIf="currentView === 'create'" [formGroup]="createAddressForm" (ngSubmit)="submitForm()" aria-label="Create billing address form" id="create-view" role="tabpanel">
+      <div class="modal-body">
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="alert alert-error" role="alert" aria-live="assertive">
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <!-- Address Information Section -->
+        <div class="form-section">
+          <h4 class="form-section-title">Adres Bilgileri</h4>
+          
+          <div class="form-group">
+            <label for="addressTitle" class="form-label">Adres Başlığı</label>
+            <input 
+              type="text" 
+              id="addressTitle" 
+              formControlName="addressTitle" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('addressTitle', 'create')"
+              [class.input-valid]="isFieldValid('addressTitle', 'create')"
+              placeholder="Örn: Ev Adresi, İş Adresi"
+              [attr.aria-invalid]="isFieldInvalid('addressTitle', 'create')"
+              [attr.aria-describedby]="isFieldInvalid('addressTitle', 'create') ? 'addressTitle-error' : 'addressTitle-help'"
+            />
+            <div id="addressTitle-help" class="form-help">
+              Bu adres için tanımlayıcı bir başlık (isteğe bağlı)
+            </div>
+            <div *ngIf="isFieldInvalid('addressTitle', 'create')" class="form-error" id="addressTitle-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('addressTitle', 'create') }}</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="fullAddress" class="form-label">Tam Adres *</label>
+            <textarea 
+              id="fullAddress" 
+              formControlName="fullAddress" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('fullAddress', 'create')"
+              [class.input-valid]="isFieldValid('fullAddress', 'create')"
+              placeholder="Sokak, cadde, mahalle, bina no, daire no gibi detaylı adres bilgilerini girin"
+              rows="3"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('fullAddress', 'create')"
+              [attr.aria-describedby]="isFieldInvalid('fullAddress', 'create') ? 'fullAddress-error' : 'fullAddress-help'"
+            ></textarea>
+            <div id="fullAddress-help" class="form-help">
+              Fatura ve teslimat için kullanılacak tam adres bilgisi
+            </div>
+            <div *ngIf="isFieldInvalid('fullAddress', 'create')" class="form-error" id="fullAddress-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('fullAddress', 'create') }}</span>
+            </div>
+            <div *ngIf="isFieldValid('fullAddress', 'create')" class="form-success" aria-label="Valid input">
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city" class="form-label">Şehir *</label>
+              <input 
+                type="text" 
+                id="city" 
+                formControlName="city" 
+                [class.form-input]="true"
+                [class.input-invalid]="isFieldInvalid('city', 'create')"
+                [class.input-valid]="isFieldValid('city', 'create')"
+                placeholder="Şehir adı"
+                aria-required="true"
+                [attr.aria-invalid]="isFieldInvalid('city', 'create')"
+                [attr.aria-describedby]="isFieldInvalid('city', 'create') ? 'city-error' : null"
+              />
+              <div *ngIf="isFieldInvalid('city', 'create')" class="form-error" id="city-error" role="alert">
+                <span class="material-symbols-outlined" aria-hidden="true">error</span>
+                <span>{{ getFieldError('city', 'create') }}</span>
+              </div>
+              <div *ngIf="isFieldValid('city', 'create')" class="form-success" aria-label="Valid input">
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="zipCode" class="form-label">Posta Kodu</label>
+              <input 
+                type="text" 
+                id="zipCode" 
+                formControlName="zipCode" 
+                [class.form-input]="true"
+                [class.input-invalid]="isFieldInvalid('zipCode', 'create')"
+                [class.input-valid]="isFieldValid('zipCode', 'create')"
+                placeholder="Posta kodu"
+                [attr.aria-invalid]="isFieldInvalid('zipCode', 'create')"
+                [attr.aria-describedby]="isFieldInvalid('zipCode', 'create') ? 'zipCode-error' : 'zipCode-help'"
+              />
+              <div id="zipCode-help" class="form-help">
+                Posta kodu (isteğe bağlı)
+              </div>
+              <div *ngIf="isFieldInvalid('zipCode', 'create')" class="form-error" id="zipCode-error" role="alert">
+                <span class="material-symbols-outlined" aria-hidden="true">error</span>
+                <span>{{ getFieldError('zipCode', 'create') }}</span>
+              </div>
+              <div *ngIf="isFieldValid('zipCode', 'create')" class="form-success" aria-label="Valid input">
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Holder Name Section -->
+        <div class="form-section">
+          <div class="form-group">
+            <label for="createAccountHolderName" class="form-label">Hesap Sahibi Adı *</label>
+            <input 
+              type="text" 
+              id="createAccountHolderName" 
+              formControlName="accountHolderName" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('accountHolderName', 'create')"
+              [class.input-valid]="isFieldValid('accountHolderName', 'create')"
+              placeholder="Fatura için hesap sahibi adını girin"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('accountHolderName', 'create')"
+              [attr.aria-describedby]="isFieldInvalid('accountHolderName', 'create') ? 'createAccountHolderName-error' : 'createAccountHolderName-help'"
+            />
+            <div id="createAccountHolderName-help" class="form-help">
+              Bu isim fatura ve ödeme işlemlerinde kullanılacaktır
+            </div>
+            <div *ngIf="isFieldInvalid('accountHolderName', 'create')" class="form-error" id="createAccountHolderName-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('accountHolderName', 'create') }}</span>
+            </div>
+            <div *ngIf="isFieldValid('accountHolderName', 'create')" class="form-success" aria-label="Valid input">
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address Preview -->
+        <div *ngIf="createAddressForm.get('fullAddress')?.value || createAddressForm.get('city')?.value" class="address-preview">
+          <h4 class="preview-title">Adres Önizleme</h4>
+          <div class="preview-content">
+            <div class="preview-address">
+              <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+              <div>
+                <p class="preview-address-title">{{ createAddressForm.get('addressTitle')?.value || 'Yeni Adres' }}</p>
+                <p class="preview-address-details">
+                  {{ createAddressForm.get('fullAddress')?.value }}{{ createAddressForm.get('city')?.value ? ', ' + createAddressForm.get('city')?.value : '' }}{{ createAddressForm.get('zipCode')?.value ? ', ' + createAddressForm.get('zipCode')?.value : '' }}
+                </p>
+              </div>
+            </div>
+            <div *ngIf="createAddressForm.get('accountHolderName')?.value" class="preview-account-holder">
+              <span class="material-symbols-outlined" aria-hidden="true">person</span>
+              <div>
+                <p class="preview-label">Hesap Sahibi</p>
+                <p class="preview-value">{{ createAddressForm.get('accountHolderName')?.value }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="switchToSelectView()" [disabled]="isLoading" aria-label="Back to address selection">
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+          Geri
+        </button>
+        <button type="submit" 
+                class="btn-primary" 
+                [disabled]="createAddressForm.invalid || isLoading" 
+                aria-label="Create billing address">
+          <span *ngIf="isLoading" class="material-symbols-outlined spinning" aria-hidden="true">progress_activity</span>
+          <span *ngIf="!isLoading">Fatura Adresi Oluştur</span>
+        </button>
+      </footer>
+    </form>
+
+    <!-- Edit Billing Profile View -->
+    <form *ngIf="currentView === 'edit'" [formGroup]="editBillingForm" (ngSubmit)="submitForm()" aria-label="Edit billing profile form" id="edit-view" role="tabpanel">
+      <div class="modal-body">
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="alert alert-error" role="alert" aria-live="assertive">
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <!-- Account Holder Name Section -->
+        <div class="form-section">
+          <h4 class="form-section-title">Hesap Sahibi Bilgileri</h4>
+          
+          <div class="form-group">
+            <label for="editAccountHolderName" class="form-label">Hesap Sahibi Adı *</label>
+            <input 
+              #firstInput
+              type="text" 
+              id="editAccountHolderName" 
+              formControlName="accountHolderName" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('accountHolderName', 'edit')"
+              [class.input-valid]="isFieldValid('accountHolderName', 'edit')"
+              placeholder="Fatura için hesap sahibi adını girin"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('accountHolderName', 'edit')"
+              [attr.aria-describedby]="isFieldInvalid('accountHolderName', 'edit') ? 'editAccountHolderName-error' : 'editAccountHolderName-help'"
+            />
+            <div id="editAccountHolderName-help" class="form-help">
+              Bu isim fatura ve ödeme işlemlerinde kullanılacaktır
+            </div>
+            <div *ngIf="isFieldInvalid('accountHolderName', 'edit')" class="form-error" id="editAccountHolderName-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('accountHolderName', 'edit') }}</span>
+            </div>
+            <div *ngIf="isFieldValid('accountHolderName', 'edit')" class="form-success" aria-label="Valid input">
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address Information Section -->
+        <div class="form-section">
+          <h4 class="form-section-title">Adres Bilgileri</h4>
+          
+          <div class="form-group">
+            <label for="editAddressTitle" class="form-label">Adres Başlığı</label>
+            <input 
+              type="text" 
+              id="editAddressTitle" 
+              formControlName="addressTitle" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('addressTitle', 'edit')"
+              [class.input-valid]="isFieldValid('addressTitle', 'edit')"
+              placeholder="Örn: Ev Adresi, İş Adresi"
+              [attr.aria-invalid]="isFieldInvalid('addressTitle', 'edit')"
+              [attr.aria-describedby]="isFieldInvalid('addressTitle', 'edit') ? 'editAddressTitle-error' : 'editAddressTitle-help'"
+            />
+            <div id="editAddressTitle-help" class="form-help">
+              Bu adres için tanımlayıcı bir başlık (isteğe bağlı)
+            </div>
+            <div *ngIf="isFieldInvalid('addressTitle', 'edit')" class="form-error" id="editAddressTitle-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('addressTitle', 'edit') }}</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editFullAddress" class="form-label">Tam Adres *</label>
+            <textarea 
+              id="editFullAddress" 
+              formControlName="fullAddress" 
+              [class.form-input]="true"
+              [class.input-invalid]="isFieldInvalid('fullAddress', 'edit')"
+              [class.input-valid]="isFieldValid('fullAddress', 'edit')"
+              placeholder="Sokak, cadde, mahalle, bina no, daire no gibi detaylı adres bilgilerini girin"
+              rows="3"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('fullAddress', 'edit')"
+              [attr.aria-describedby]="isFieldInvalid('fullAddress', 'edit') ? 'editFullAddress-error' : 'editFullAddress-help'"
+            ></textarea>
+            <div id="editFullAddress-help" class="form-help">
+              Fatura ve teslimat için kullanılacak tam adres bilgisi
+            </div>
+            <div *ngIf="isFieldInvalid('fullAddress', 'edit')" class="form-error" id="editFullAddress-error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
+              <span>{{ getFieldError('fullAddress', 'edit') }}</span>
+            </div>
+            <div *ngIf="isFieldValid('fullAddress', 'edit')" class="form-success" aria-label="Valid input">
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editCity" class="form-label">Şehir *</label>
+              <input 
+                type="text" 
+                id="editCity" 
+                formControlName="city" 
+                [class.form-input]="true"
+                [class.input-invalid]="isFieldInvalid('city', 'edit')"
+                [class.input-valid]="isFieldValid('city', 'edit')"
+                placeholder="Şehir adı"
+                aria-required="true"
+                [attr.aria-invalid]="isFieldInvalid('city', 'edit')"
+                [attr.aria-describedby]="isFieldInvalid('city', 'edit') ? 'editCity-error' : null"
+              />
+              <div *ngIf="isFieldInvalid('city', 'edit')" class="form-error" id="editCity-error" role="alert">
+                <span class="material-symbols-outlined" aria-hidden="true">error</span>
+                <span>{{ getFieldError('city', 'edit') }}</span>
+              </div>
+              <div *ngIf="isFieldValid('city', 'edit')" class="form-success" aria-label="Valid input">
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="editZipCode" class="form-label">Posta Kodu</label>
+              <input 
+                type="text" 
+                id="editZipCode" 
+                formControlName="zipCode" 
+                [class.form-input]="true"
+                [class.input-invalid]="isFieldInvalid('zipCode', 'edit')"
+                [class.input-valid]="isFieldValid('zipCode', 'edit')"
+                placeholder="Posta kodu"
+                [attr.aria-invalid]="isFieldInvalid('zipCode', 'edit')"
+                [attr.aria-describedby]="isFieldInvalid('zipCode', 'edit') ? 'editZipCode-error' : 'editZipCode-help'"
+              />
+              <div id="editZipCode-help" class="form-help">
+                Posta kodu (isteğe bağlı)
+              </div>
+              <div *ngIf="isFieldInvalid('zipCode', 'edit')" class="form-error" id="editZipCode-error" role="alert">
+                <span class="material-symbols-outlined" aria-hidden="true">error</span>
+                <span>{{ getFieldError('zipCode', 'edit') }}</span>
+              </div>
+              <div *ngIf="isFieldValid('zipCode', 'edit')" class="form-success" aria-label="Valid input">
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address Preview -->
+        <div *ngIf="editBillingForm.get('fullAddress')?.value || editBillingForm.get('city')?.value" class="address-preview">
+          <h4 class="preview-title">Adres Önizleme</h4>
+          <div class="preview-content">
+            <div class="preview-address">
+              <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+              <div>
+                <p class="preview-address-title">{{ editBillingForm.get('addressTitle')?.value || 'Fatura Adresi' }}</p>
+                <p class="preview-address-details">
+                  {{ editBillingForm.get('fullAddress')?.value }}{{ editBillingForm.get('city')?.value ? ', ' + editBillingForm.get('city')?.value : '' }}{{ editBillingForm.get('zipCode')?.value ? ', ' + editBillingForm.get('zipCode')?.value : '' }}
+                </p>
+              </div>
+            </div>
+            <div *ngIf="editBillingForm.get('accountHolderName')?.value" class="preview-account-holder">
+              <span class="material-symbols-outlined" aria-hidden="true">person</span>
+              <div>
+                <p class="preview-label">Hesap Sahibi</p>
+                <p class="preview-value">{{ editBillingForm.get('accountHolderName')?.value }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModal()" [disabled]="isLoading" aria-label="Cancel">
+          İptal
+        </button>
+        <button type="submit" 
+                class="btn-primary" 
+                [disabled]="editBillingForm.invalid || isLoading" 
+                aria-label="Update billing profile">
+          <span *ngIf="isLoading" class="material-symbols-outlined spinning" aria-hidden="true">progress_activity</span>
+          <span *ngIf="!isLoading">Fatura Profilini Güncelle</span>
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>

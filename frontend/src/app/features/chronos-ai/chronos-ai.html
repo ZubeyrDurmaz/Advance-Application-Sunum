@@ -1,0 +1,94 @@
+<app-navbar />
+
+<main class="ai-page">
+  <div class="ai-chat-area" #chatContainer>
+    <div class="ai-chat-inner">
+
+      @for (message of messages; track $index) {
+        @if (message.role === 'user') {
+          <div class="ai-user-message-wrap">
+            <div class="ai-user-bubble">
+              <p class="ai-user-text">{{ message.text }}</p>
+            </div>
+          </div>
+        }
+
+        @if (message.role === 'ai') {
+          <div class="ai-response-wrap">
+            <div class="ai-response-header">
+              <div class="ai-avatar ai-glow">
+                <span class="material-symbols-outlined ai-avatar-icon">auto_awesome</span>
+              </div>
+              <div class="ai-response-body">
+                <h2 class="ai-response-text">"{{ message.text }}"</h2>
+              </div>
+            </div>
+
+            @if (message.recommendations) {
+              <div class="ai-recommendations">
+                @for (watch of message.recommendations; track watch.name) {
+                  <div class="ai-watch-card ai-glow">
+                    <div class="ai-watch-image-wrap">
+                      <img class="ai-watch-image" [src]="watch.image" [alt]="watch.name" />
+                    </div>
+                    <h3 class="ai-watch-name">{{ watch.name }}</h3>
+                    <p class="ai-watch-ref">{{ watch.ref }}</p>
+                    <div class="ai-watch-footer">
+                      <span class="ai-watch-price">{{ watch.price }}</span>
+                      <button class="ai-watch-details-btn" (click)="onDetails(watch)">Details</button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (message.followUp) {
+              <div class="ai-follow-up">
+                <p class="ai-follow-up-text">{{ message.followUp }}</p>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      @if (isTyping) {
+        <div class="ai-typing-indicator">
+          <div class="ai-avatar ai-glow">
+            <span class="material-symbols-outlined ai-avatar-icon">auto_awesome</span>
+          </div>
+          <div class="ai-typing-dots">
+            <span class="ai-dot ai-dot--1"></span>
+            <span class="ai-dot ai-dot--2"></span>
+            <span class="ai-dot ai-dot--3"></span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="ai-input-area">
+    <div class="ai-input-inner">
+      <textarea class="ai-textarea"
+        placeholder="Inquire about history, specifications, or pricing..."
+        rows="1"
+        [(ngModel)]="inputText"
+        (keydown.enter)="$event.preventDefault(); onSend()">
+      </textarea>
+      <button class="ai-send-btn" (click)="onSend()">
+        <span class="ai-send-label">Send</span>
+        <span class="material-symbols-outlined">north_east</span>
+      </button>
+    </div>
+    <div class="ai-suggestions">
+      @for (suggestion of suggestions; track suggestion) {
+        <button class="ai-suggestion-chip" (click)="onSuggestion(suggestion)">{{ suggestion }}</button>
+      }
+    </div>
+  </div>
+</main>
+
+<div class="ai-fab">
+  <button class="ai-fab-btn">
+    <span class="material-symbols-outlined">chat_bubble</span>
+  </button>
+</div>

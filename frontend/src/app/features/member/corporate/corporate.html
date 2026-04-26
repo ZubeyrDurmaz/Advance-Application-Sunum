@@ -1,0 +1,120 @@
+<app-navbar />
+
+<div class="corp-body">
+  <app-sidebar [links]="sidebarLinks" />
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <span class="section-label">Corporate Dashboard</span>
+      <h1 class="corp-heading">Welcome, {{ userName }}</h1>
+      <p class="corp-subtext">Monitor sales performance, manage inventory, track orders and gain customer insights.</p>
+    </header>
+
+    <!-- KPI Bento Grid -->
+    <div class="corp-bento">
+      <div class="corp-card corp-card--large">
+        <div class="corp-card-bg"></div>
+        <div class="corp-card-content">
+          <span class="material-symbols-outlined corp-card-icon">payments</span>
+          <h2 class="corp-card-title">Total Revenue</h2>
+          <p class="corp-card-value serif">{{ analytics ? formatPrice(analytics.totalRevenue) : '—' }}</p>
+          <p class="corp-card-sub">{{ store?.name ?? '' }}</p>
+        </div>
+      </div>
+
+      <a class="corp-card corp-card--white" [routerLink]="['/corporate/orders']">
+        <div class="corp-card-icon-wrap muted"><span class="material-symbols-outlined">receipt_long</span></div>
+        <h3 class="corp-card-sm-title">Total Orders</h3>
+        <p class="corp-card-sm-value serif">{{ analytics?.totalOrders ?? '—' }}</p>
+        <span class="card-cta">View Orders <span class="material-symbols-outlined">chevron_right</span></span>
+      </a>
+
+      <a class="corp-card" [routerLink]="['/corporate/inventory']">
+        <div class="corp-card-icon-wrap muted"><span class="material-symbols-outlined">inventory_2</span></div>
+        <h3 class="corp-card-sm-title">Active Inventory</h3>
+        <p class="corp-card-sm-value serif">{{ analytics?.totalProducts ?? '—' }} Pieces</p>
+        <span class="card-cta">Manage Stock <span class="material-symbols-outlined">chevron_right</span></span>
+      </a>
+
+      <a class="corp-card" [routerLink]="['/corporate/customers']">
+        <div class="corp-card-icon-wrap muted"><span class="material-symbols-outlined">group</span></div>
+        <h3 class="corp-card-sm-title">Customers</h3>
+        <p class="corp-card-sm-value serif">{{ analytics?.totalCustomers ?? '—' }}</p>
+        <span class="card-cta">Customer Insights <span class="material-symbols-outlined">chevron_right</span></span>
+      </a>
+    </div>
+
+    <!-- Analytics Section -->
+    @if (analytics) {
+      <section class="corp-analytics">
+        <div class="analytics-header">
+          <div>
+            <span class="section-label">Sales Analytics</span>
+            <h2 class="analytics-title serif">Revenue Overview</h2>
+          </div>
+        </div>
+
+        <div class="corp-analytics-grid">
+          <!-- Monthly Chart -->
+          @if (analytics.monthlySales?.length) {
+            <div class="analytics-chart-card">
+              <h3 class="analytics-chart-title">Monthly Sales</h3>
+              <div class="monthly-bars">
+                @for (m of getFilledMonths(); track m.month) {
+                  <div class="monthly-bar-col">
+                    @if (m.revenue > 0) {
+                      <span class="monthly-bar-value">{{ formatPriceCompact(m.revenue) }}</span>
+                    } @else {
+                      <span class="monthly-bar-value" style="opacity: 0">-</span>
+                    }
+                    <div class="monthly-bar-wrap">
+                      <div class="monthly-bar" [style.height]="getBarHeight(m.revenue)"></div>
+                    </div>
+                    <span class="monthly-bar-label">{{ m.month }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Top Products -->
+          @if (analytics.topProducts?.length) {
+            <div class="corp-top-products">
+              <h3 class="analytics-chart-title">Top Performing Products</h3>
+              <div class="corp-products-table">
+                <div class="corp-products-head">
+                  <span>Product</span>
+                  <span>Units Sold</span>
+                  <span>Revenue</span>
+                </div>
+                @for (p of analytics.topProducts; track p.name) {
+                  <div class="corp-product-row">
+                    <div>
+                      <p class="corp-product-name">{{ p.name }}</p>
+                      <div class="corp-product-stars">
+                        @for (star of [1,2,3,4,5]; track star) {
+                          <span class="material-symbols-outlined corp-star" [class.corp-star--filled]="star <= p.averageRating" [class.corp-star--empty]="star > p.averageRating">star</span>
+                        }
+                        <span class="corp-star-label">{{ p.averageRating > 0 ? p.averageRating : '—' }}</span>
+                      </div>
+                    </div>
+                    <span class="corp-product-sold">{{ p.unitsSold }}</span>
+                    <span class="corp-product-revenue">{{ formatPrice(p.revenue) }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    } @else if (!loading) {
+      <p style="color:#888;padding:2rem;">No analytics data available yet.</p>
+    } @else {
+      <p style="color:#888;padding:2rem;">Loading…</p>
+    }
+  </main>
+</div>
+
+<footer class="page-footer">
+  <p class="footer-copy">© 2024 CHRONOS. All Rights Reserved.</p>
+</footer>

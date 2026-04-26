@@ -1,0 +1,96 @@
+<app-navbar />
+<div class="corp-body">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Admin Panel</h3>
+      <p class="sidebar-subtitle">System Control</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" [routerLink]="['/admin']"><span class="material-symbols-outlined">admin_panel_settings</span><span>Dashboard</span></a>
+      <a class="nav-link" [routerLink]="['/admin/stores']"><span class="material-symbols-outlined">storefront</span><span>Stores</span></a>
+      <a class="nav-link" [routerLink]="['/admin/users']"><span class="material-symbols-outlined">manage_accounts</span><span>Users</span></a>
+      <a class="nav-link" [routerLink]="['/admin/orders']"><span class="material-symbols-outlined">receipt_long</span><span>Orders</span></a>
+      <a class="nav-link" [routerLink]="['/admin/products']"><span class="material-symbols-outlined">inventory_2</span><span>Products</span></a>
+      <a class="nav-link" [routerLink]="['/admin/discounts']"><span class="material-symbols-outlined">loyalty</span><span>Discounts</span></a>
+      <a class="nav-link" [routerLink]="['/admin/analytics']"><span class="material-symbols-outlined">monitoring</span><span>Analytics</span></a>
+      <a class="nav-link" [routerLink]="['/admin/config']"><span class="material-symbols-outlined">tune</span><span>Config</span></a>
+      <a class="nav-link active" [routerLink]="['/admin/logs']"><span class="material-symbols-outlined">history</span><span>Audit Logs</span></a>
+    </nav>
+    <div class="sidebar-concierge">
+      <p class="sidebar-concierge-label">System Status</p>
+      <p class="sidebar-concierge-text">All systems operational.</p>
+    </div>
+  </aside>
+
+  <main class="corp-main">
+    <header class="corp-header">
+      <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+        <a [routerLink]="['/admin']" class="btn-secondary" style="padding: 0.5rem; display: flex;"><span class="material-symbols-outlined">arrow_back</span></a>
+        <span class="section-label" style="margin: 0;">System Administration</span>
+      </div>
+      <h1 class="corp-heading">Audit Logs</h1>
+      <p class="corp-subtext">Comprehensive timeline of all critical system events and user actions.</p>
+    </header>
+
+    @if (error) {
+      <div style="padding: 1.5rem; background: #fee2e2; color: #991b1b; border-radius: 0.5rem; margin-bottom: 2rem;">
+        Failed to load logs. Make sure the backend is running.
+      </div>
+    }
+
+    <!-- Filters -->
+    <div class="admin-toolbar" style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+      <div class="search-wrap" style="flex: 1; min-width: 250px;">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input type="text" class="search-input" placeholder="Search logs..." (input)="searchTerm = $any($event.target).value">
+      </div>
+      <select class="admin-select" (change)="filterAction = $any($event.target).value" style="min-width: 200px;">
+        <option value="">All Actions</option>
+        @for (action of uniqueActions; track action) {
+          <option [value]="action">{{ action }}</option>
+        }
+      </select>
+      <button class="btn-secondary" (click)="fetchLogs()"><span class="material-symbols-outlined">refresh</span> Refresh</button>
+      <button class="btn-primary" (click)="downloadCsv()"><span class="material-symbols-outlined">download</span> Download CSV</button>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="corp-card" style="padding: 0; overflow: hidden;">
+      @if (loading) {
+        <div style="padding: 3rem; text-align: center; color: #888;">Loading logs...</div>
+      } @else if (filteredLogs.length === 0) {
+        <div style="padding: 3rem; text-align: center; color: #888;">No audit logs found matching your criteria.</div>
+      } @else {
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Action</th>
+                <th>User / System</th>
+                <th>Details</th>
+                <th>Target ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (log of filteredLogs; track log.id) {
+                <tr>
+                  <td style="white-space: nowrap; color: #78716c; font-size: 0.8125rem;">{{ formatDate(log.timestamp) }}</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <span class="material-symbols-outlined" style="font-size: 1rem; color: var(--color-primary);">{{ getActionIcon(log.action) }}</span>
+                      <span style="font-weight: 600; font-size: 0.8125rem;">{{ log.action }}</span>
+                    </div>
+                  </td>
+                  <td style="font-weight: 500;">{{ log.performedBy }}</td>
+                  <td style="color: #444; max-width: 300px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" [title]="log.details">{{ log.details }}</td>
+                  <td style="font-family: monospace; font-size: 0.75rem; color: #888;">{{ log.entityId || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </main>
+</div>

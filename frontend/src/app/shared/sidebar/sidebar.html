@@ -1,0 +1,71 @@
+<!-- Screen reader live region: announces sidebar open/close state on mobile -->
+@if (isMobile()) {
+  <div class="sr-only" aria-live="polite" aria-atomic="true">{{ sidebarStatusMessage() }}</div>
+}
+
+<!-- Mobile toggle button (visible only on mobile) -->
+@if (isMobile()) {
+  <button 
+    class="sidebar-toggle" 
+    (click)="toggleSidebar()"
+    [attr.aria-expanded]="isOpen()"
+    aria-controls="sidebar-panel"
+    aria-label="Toggle sidebar navigation"
+    type="button">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+}
+
+<!-- Overlay backdrop (visible only on mobile when sidebar is open) -->
+@if (isMobile() && isOpen()) {
+  <div 
+    class="sidebar-overlay" 
+    (click)="closeSidebar()"
+    aria-hidden="true">
+  </div>
+}
+
+<!-- Sidebar container -->
+<aside 
+  class="sidebar"
+  id="sidebar-panel"
+  [class.open]="isOpen()"
+  [attr.aria-hidden]="isMobile() && !isOpen()"
+  [attr.role]="isMobile() ? 'dialog' : null"
+  [attr.aria-modal]="isMobile() ? isOpen() : null"
+  [attr.aria-label]="isMobile() ? 'Sidebar navigation' : null">
+  
+  <!-- Close button for mobile -->
+  @if (isMobile()) {
+    <button 
+      class="sidebar-close" 
+      (click)="closeSidebar()"
+      aria-label="Close sidebar"
+      type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  }
+
+  <!-- Navigation links -->
+  <nav class="sidebar-nav" aria-label="Sidebar navigation">
+    @for (link of links; track link.route) {
+      <a 
+        [routerLink]="link.route" 
+        routerLinkActive="active"
+        class="sidebar-link"
+        (click)="closeSidebar()">
+        @if (link.icon) {
+          <span class="material-symbols-outlined sidebar-icon">{{ link.icon }}</span>
+        }
+        <span class="sidebar-label">{{ link.label }}</span>
+      </a>
+    }
+  </nav>
+</aside>
