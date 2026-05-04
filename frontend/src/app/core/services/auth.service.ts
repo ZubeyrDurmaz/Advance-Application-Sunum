@@ -90,8 +90,9 @@ export class AuthService {
   private initializeAuthState(): void {
     const user = this.tokenStorage.getUser();
     const hasValidToken = this.tokenStorage.hasValidToken();
-    
-    if (user && hasValidToken) {
+    const hasRefreshToken = !!this.tokenStorage.getRefreshToken();
+
+    if (user && (hasValidToken || hasRefreshToken)) {
       this.updateAuthState({
         isAuthenticated: true,
         user: user,
@@ -353,7 +354,8 @@ export class AuthService {
    * @returns true if user is authenticated, false otherwise
    */
   isAuthenticated(): boolean {
-    return this.authStateSubject.value.isAuthenticated && this.tokenStorage.hasValidToken();
+    return this.authStateSubject.value.isAuthenticated &&
+           (this.tokenStorage.hasValidToken() || !!this.tokenStorage.getRefreshToken());
   }
 
   /**

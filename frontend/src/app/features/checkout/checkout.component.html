@@ -1,0 +1,210 @@
+<div class="checkout-container">
+  <div class="checkout-content">
+    <!-- Order Summary -->
+    <div class="order-summary">
+      <h2>Order Summary</h2>
+      
+      @if (cartItems().length === 0) {
+        <div class="empty-cart">
+          <p>Your cart is empty</p>
+          <button (click)="goToCollection()" class="btn-primary">Continue Shopping</button>
+        </div>
+      } @else {
+        <div class="cart-items">
+          @for (item of cartItems(); track item.slug) {
+            <div class="cart-item">
+              <img [src]="item.image" [alt]="item.name" class="item-image">
+              <div class="item-details">
+                <h3>{{ item.name }}</h3>
+                <p class="item-quantity">Quantity: {{ item.quantity }}</p>
+                <p class="item-price">{{ formatPrice(item.price) }}</p>
+              </div>
+              <div class="item-total">
+                {{ formatPrice(item.price * item.quantity) }}
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Shipping Address Section -->
+        <div class="address-section">
+          <h3>Shipping Address</h3>
+          
+          @if (loadingAddresses()) {
+            <p class="loading-text">Loading addresses...</p>
+          } @else if (addresses().length === 0) {
+            <p class="no-address-text">No saved addresses. Please add a new address.</p>
+          } @else {
+            <div class="address-list">
+              @for (address of addresses(); track address.id) {
+                <label class="address-option" [class.selected]="selectedAddressId() === address.id">
+                  <input
+                    type="radio"
+                    name="address"
+                    [value]="address.id"
+                    [checked]="selectedAddressId() === address.id"
+                    (change)="selectedAddressId.set(address.id)"
+                    class="address-radio"
+                  >
+                  <div class="address-details">
+                    <div class="address-header">
+                      <strong>{{ address.addressTitle || 'Address' }}</strong>
+                      @if (address.isDefault) {
+                        <span class="default-badge">Default</span>
+                      }
+                    </div>
+                    <p class="address-text">{{ address.fullAddress }}</p>
+                    <p class="address-text">{{ address.city }} {{ address.zipCode }}</p>
+                  </div>
+                </label>
+              }
+            </div>
+          }
+
+          <!-- Add New Address Button -->
+          @if (!showAddressForm()) {
+            <button (click)="toggleAddressForm()" class="btn-add-address">
+              + Add New Address
+            </button>
+          }
+
+          <!-- New Address Form -->
+          @if (showAddressForm()) {
+            <div class="new-address-form">
+              <h4>New Address</h4>
+              
+              <div class="form-group">
+                <label>Address Title (Optional)</label>
+                <input
+                  type="text"
+                  [ngModel]="newAddress().addressTitle"
+                  (ngModelChange)="updateNewAddress('addressTitle', $event)"
+                  placeholder="e.g., Home, Office"
+                  class="form-input"
+                >
+              </div>
+
+              <div class="form-group">
+                <label>Full Address *</label>
+                <textarea
+                  [ngModel]="newAddress().fullAddress"
+                  (ngModelChange)="updateNewAddress('fullAddress', $event)"
+                  placeholder="Street address, apartment, suite, etc."
+                  class="form-textarea"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>City *</label>
+                  <input
+                    type="text"
+                    [ngModel]="newAddress().city"
+                    (ngModelChange)="updateNewAddress('city', $event)"
+                    placeholder="City"
+                    class="form-input"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Zip Code</label>
+                  <input
+                    type="text"
+                    [ngModel]="newAddress().zipCode"
+                    (ngModelChange)="updateNewAddress('zipCode', $event)"
+                    placeholder="Zip Code"
+                    class="form-input"
+                  >
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button (click)="saveNewAddress()" [disabled]="loading()" class="btn-save">
+                  {{ loading() ? 'Saving...' : 'Save Address' }}
+                </button>
+                <button (click)="toggleAddressForm()" class="btn-cancel">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Discount Code Section -->
+        <div class="discount-section">
+          <h3>Discount Code</h3>
+          
+          @if (!discountApplied()) {
+            <div class="discount-input-group">
+              <input
+                type="text"
+                [ngModel]="discountCode()"
+                (ngModelChange)="discountCode.set($event)"
+                placeholder="Enter discount code"
+                class="discount-input"
+                [disabled]="loading()"
+              >
+              <button
+                (click)="applyDiscount()"
+                [disabled]="loading() || !discountCode()"
+                class="btn-apply"
+              >
+                {{ loading() ? 'Validating...' : 'Apply' }}
+              </button>
+            </div>
+            
+            @if (discountError()) {
+              <p class="error-message">{{ discountError() }}</p>
+            }
+          } @else {
+            <div class="discount-applied">
+              <div class="discount-info">
+                <span class="discount-code">{{ discountCode() }}</span>
+                <span class="discount-message">{{ discountMessage() }}</span>
+              </div>
+              <button (click)="removeDiscount()" class="btn-remove">Remove</button>
+            </div>
+          }
+        </div>
+
+        <!-- Price Breakdown -->
+        <div class="price-breakdown">
+          <div class="price-row">
+            <span>Subtotal</span>
+            <span>{{ formatPrice(subtotal()) }}</span>
+          </div>
+          
+          @if (discountAmount() > 0) {
+            <div class="price-row discount-row">
+              <span>Discount</span>
+              <span class="discount-value">-{{ formatPrice(discountAmount()) }}</span>
+            </div>
+          }
+          
+          <div class="price-row total-row">
+            <span>Total</span>
+            <span class="total-amount">{{ formatPrice(total()) }}</span>
+          </div>
+        </div>
+
+        <!-- Checkout Button -->
+        <button
+          (click)="proceedToPayment()"
+          [disabled]="processingPayment() || cartItems().length === 0"
+          class="btn-checkout"
+        >
+          {{ processingPayment() ? 'Processing...' : 'Proceed to Payment' }}
+        </button>
+
+        <p class="secure-payment">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          Secure payment powered by Stripe
+        </p>
+      }
+    </div>
+  </div>
+</div>

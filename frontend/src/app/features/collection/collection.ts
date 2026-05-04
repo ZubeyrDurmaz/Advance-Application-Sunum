@@ -38,7 +38,6 @@ interface FilterGroup {
 }
 
 const PAGE_SIZE = 20;
-const PLACEHOLDER_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuA5sKqM25tajyHx49E8AmC01WoOZSim69pWB4GjaWNWqfHQ7I6jgjhd8edCebN8fuSG41FRNsQD1ymylzxmZphHO-RSopvPAsbGXEopbLsn-yMgNk1jPIOO0b3NXzdwkIWulKF7h0MUcQRQb1GuiKuZgpm2rrxMOxtvmtQx1K1mfKT8NQVTxH5Cz4Z6yKPMl2fxsSRTZf5EqzQnOe7Rr8r2Bd866hIIxGXnsA1X5SjFB4WAom4jIiYfKW9fJLKy2gv5murE26cWMPvo';
 
 function mapProduct(p: ProductResponse): DisplayProduct {
   return {
@@ -50,7 +49,8 @@ function mapProduct(p: ProductResponse): DisplayProduct {
     categoryName: p.categoryName || 'Uncategorized',
     stockQuantity: p.stockQuantity ?? 0,
     slug: p.sku,
-    image: PLACEHOLDER_IMG,
+    // Image comes straight from the database (image_url column populated by the seeder)
+    image: p.imageUrl || (p.images && p.images.length > 0 ? p.images[0] : ''),
   };
 }
 
@@ -75,6 +75,7 @@ export class Collection implements OnInit, OnDestroy {
   totalElements = signal(0);
 
   Object = Object;
+  Math = Math;
 
   featuredCollections: FeaturedCollection[] = [
     { categoryName: 'Professional Diving', tagline: 'Engineered for the Deep', icon: 'scuba_diving',
@@ -150,8 +151,58 @@ export class Collection implements OnInit, OnDestroy {
   }
 
   private loadPage(page: number): void {
+    const categoryId = this.selectedCategoryId();
+    const priceRange = this.selectedPriceRange();
+    const stock = this.selectedStock();
+    const sort = this.sortBy();
+    const search = this.searchQuery();
+
+    // Map price range to min/max
+    let minPrice: number | undefined;
+    let maxPrice: number | undefined;
+    if (priceRange) {
+      const range = this.priceRanges.find(r => r.label === priceRange);
+      if (range) {
+        minPrice = range.min;
+        maxPrice = range.max === Infinity ? undefined : range.max;
+      }
+    }
+
+    // Map sort to backend format
+    let sortBy = 'name';
+    let sortDirection = 'asc';
+    switch (sort) {
+      case 'price-asc':
+        sortBy = 'price';
+        sortDirection = 'asc';
+        break;
+      case 'price-desc':
+        sortBy = 'price';
+        sortDirection = 'desc';
+        break;
+      case 'name-desc':
+        sortBy = 'name';
+        sortDirection = 'desc';
+        break;
+      case 'name-asc':
+      default:
+        sortBy = 'name';
+        sortDirection = 'asc';
+        break;
+    }
+
     this.subs.add(
-      this.productService.getProductsPaginated(page, PAGE_SIZE).subscribe(res => {
+      this.productService.getProductsFiltered(
+        page,
+        PAGE_SIZE,
+        search || undefined,
+        categoryId || undefined,
+        minPrice,
+        maxPrice,
+        stock || undefined,
+        sortBy,
+        sortDirection
+      ).subscribe(res => {
         this.allProducts.set(res.content.map(mapProduct));
         this.currentPage.set(res.currentPage);
         this.totalPages.set(res.totalPages);
@@ -165,52 +216,51 @@ export class Collection implements OnInit, OnDestroy {
   }
 
   get pageNumbers(): number[] {
-    return Array.from({ length: this.totalPages() }, (_, i) => i);
+    const total = this.totalPages();
+    const current = this.currentPage();
+    
+    // Show max 7 page numbers
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i);
+    }
+    
+    // Smart pagination: show first, last, current and neighbors
+    const pages: number[] = [];
+    
+    // Always show first page
+    pages.push(0);
+    
+    // Show pages around current
+    const start = Math.max(1, current - 1);
+    const end = Math.min(total - 2, current + 1);
+    
+    // Add ellipsis if needed
+    if (start > 1) {
+      pages.push(-1); // -1 represents ellipsis
+    }
+    
+    // Add middle pages
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    // Add ellipsis if needed
+    if (end < total - 2) {
+      pages.push(-1); // -1 represents ellipsis
+    }
+    
+    // Always show last page
+    if (total > 1) {
+      pages.push(total - 1);
+    }
+    
+    return pages;
   }
 
-  // Filtered & sorted products
+  // Filtered & sorted products - now handled by backend
   filteredProducts = computed(() => {
-    let products = this.allProducts();
-    const categoryId = this.selectedCategoryId();
-    const priceRange = this.selectedPriceRange();
-    const stock = this.selectedStock();
-    const sort = this.sortBy();
-
-    // Category filter (client-side filtering since we already have data)
-    if (categoryId) {
-      const selectedCat = this.categories().find(c => c.id === categoryId);
-      if (selectedCat) {
-        products = products.filter(p => p.categoryName === selectedCat.name);
-      }
-    }
-
-    // Price range filter
-    if (priceRange) {
-      const range = this.priceRanges.find(r => r.label === priceRange);
-      if (range) {
-        products = products.filter(p => p.priceValue >= range.min && p.priceValue < range.max);
-      }
-    }
-
-    // Stock filter
-    if (stock === 'in-stock') {
-      products = products.filter(p => p.stockQuantity > 0);
-    } else if (stock === 'out-of-stock') {
-      products = products.filter(p => p.stockQuantity === 0);
-    }
-
-    // Sorting
-    products = [...products].sort((a, b) => {
-      switch (sort) {
-        case 'price-asc': return a.priceValue - b.priceValue;
-        case 'price-desc': return b.priceValue - a.priceValue;
-        case 'name-desc': return b.name.localeCompare(a.name);
-        case 'name-asc':
-        default: return a.name.localeCompare(b.name);
-      }
-    });
-
-    return products;
+    // Backend handles all filtering and sorting
+    return this.allProducts();
   });
 
   get hasActiveFilters(): boolean {
@@ -230,14 +280,17 @@ export class Collection implements OnInit, OnDestroy {
 
   selectCategory(id: string | null): void {
     this.selectedCategoryId.set(id);
+    this.loadPage(0); // Reload from first page with new filter
   }
 
   selectPriceRange(label: string | null): void {
     this.selectedPriceRange.set(this.selectedPriceRange() === label ? null : label);
+    this.loadPage(0); // Reload from first page with new filter
   }
 
   selectStock(value: string | null): void {
     this.selectedStock.set(this.selectedStock() === value ? null : value);
+    this.loadPage(0); // Reload from first page with new filter
   }
 
   clearFilters(): void {
@@ -247,6 +300,11 @@ export class Collection implements OnInit, OnDestroy {
     this.selectedStock.set(null);
     this.sortBy.set('name-asc');
     this.loadPage(0);
+  }
+
+  changeSortBy(value: string): void {
+    this.sortBy.set(value);
+    this.loadPage(0); // Reload from first page with new sort
   }
 
   goToPage(page: number): void {

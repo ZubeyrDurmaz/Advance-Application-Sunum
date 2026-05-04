@@ -4,6 +4,7 @@ import com.example.backend.dto.ReviewResponse;
 import com.example.backend.service.ReviewService;
 import com.example.backend.util.InputSanitizer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,8 +21,28 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<ReviewResponse>> getReviewsByProduct(@PathVariable String productId) {
-        return ResponseEntity.ok(reviewService.getReviewsByProductId(productId));
+    public ResponseEntity<?> getReviewsByProduct(
+            @PathVariable String productId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        
+        // If pagination params provided, return paginated response
+        if (page != null && size != null && size > 0) {
+            Page<ReviewResponse> reviewPage = reviewService.getReviewsByProductIdPaginated(productId, page, size);
+            return ResponseEntity.ok(Map.of(
+                "content", reviewPage.getContent(),
+                "totalElements", reviewPage.getTotalElements(),
+                "totalPages", reviewPage.getTotalPages(),
+                "currentPage", reviewPage.getNumber(),
+                "size", reviewPage.getSize(),
+                "hasNext", reviewPage.hasNext(),
+                "hasPrevious", reviewPage.hasPrevious()
+            ));
+        }
+        
+        // Legacy support: return all reviews without pagination
+        List<ReviewResponse> reviews = reviewService.getReviewsByProductId(productId);
+        return ResponseEntity.ok(reviews);
     }
 
     @PostMapping("/product/{productId}")

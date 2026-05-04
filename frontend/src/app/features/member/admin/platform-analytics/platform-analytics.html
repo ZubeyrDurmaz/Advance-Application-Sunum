@@ -66,10 +66,10 @@
           </div>
           <div style="margin-top:1rem;">
             @for (m of data.monthlyRevenue; track m.month) {
-              <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #222;font-size:0.875rem;">
-                <span style="color:#888;">{{ m.month }}</span>
-                <span style="color:#f0f0f0;">{{ formatPrice(m.revenue) }}</span>
-                <span style="color:#888;">{{ m.orders }} orders</span>
+              <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #e7e5dc;font-size:0.875rem;">
+                <span style="color:#1c1c19;">{{ m.month }}</span>
+                <span style="color:#1c1c19;font-weight:600;">{{ formatPrice(m.revenue) }}</span>
+                <span style="color:#78716c;">{{ m.orders }} orders</span>
               </div>
             }
           </div>

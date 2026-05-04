@@ -78,6 +78,15 @@ export class Cart implements OnInit {
     this.isAuthenticated = this.authService.isAuthenticated();
     this.isCorporate = this.authService.hasRole('CORPORATE');
 
+    // Load cart from backend if authenticated
+    if (this.isAuthenticated) {
+      this.cartService.loadCart().subscribe({
+        error: (error) => {
+          console.error('Failed to load cart:', error);
+        }
+      });
+    }
+
     // If Buy Now item exists, go directly to checkout
     if (this.buyNowItem && this.isAuthenticated && !this.isCorporate) {
       this.loadSavedData();
@@ -133,8 +142,8 @@ export class Cart implements OnInit {
       this.promptMessage = 'Corporate accounts cannot make purchases. Please use an individual account.';
       return;
     }
-    this.loadSavedData();
-    this.checkoutStep = 'shipping';
+    // Redirect to Stripe checkout page
+    this.router.navigate(['/checkout']);
   }
 
   goToPayment(): void {

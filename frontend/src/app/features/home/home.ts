@@ -36,7 +36,8 @@ export class Home {
         price: `$${p.unitPrice.toLocaleString('en-US', {minimumFractionDigits: 2})}`,
         limited: p.stockQuantity < 5,
         slug: p.sku,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA5sKqM25tajyHx49E8AmC01WoOZSim69pWB4GjaWNWqfHQ7I6jgjhd8edCebN8fuSG41FRNsQD1ymylzxmZphHO-RSopvPAsbGXEopbLsn-yMgNk1jPIOO0b3NXzdwkIWulKF7h0MUcQRQb1GuiKuZgpm2rrxMOxtvmtQx1K1mfKT8NQVTxH5Cz4Z6yKPMl2fxsSRTZf5EqzQnOe7Rr8r2Bd866hIIxGXnsA1X5SjFB4WAom4jIiYfKW9fJLKy2gv5murE26cWMPvo',
+        // Image comes from the database (image_url / images columns)
+        image: p.imageUrl || (p.images && p.images.length > 0 ? p.images[0] : ''),
       }));
     });
   }

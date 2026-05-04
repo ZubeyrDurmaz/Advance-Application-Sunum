@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { Navbar } from '../../../shared/navbar/navbar';
 import { Sidebar, SidebarLink } from '../../../shared/sidebar/sidebar';
-import { LazyLoadDirective } from '../../../shared/directives/lazy-load.directive';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AddressService } from '../../../core/services/address.service';
@@ -17,7 +16,7 @@ import { CategorySpending, MonthlyActivity } from '../../../core/models/analytic
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, CommonModule, Navbar, Sidebar, LazyLoadDirective],
+  imports: [RouterLink, CommonModule, Navbar, Sidebar],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })

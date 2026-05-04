@@ -80,7 +80,7 @@
           <div>
             <h4 class="filter-group-label">Sort By</h4>
             <div class="filter-options">
-              <label class="filter-option" (click)="sortBy.set('name-asc')">
+              <label class="filter-option" (click)="changeSortBy('name-asc')">
                 <div class="filter-checkbox"
                   [class.filter-checkbox--checked]="sortBy() === 'name-asc'"
                   [class.filter-checkbox--unchecked]="sortBy() !== 'name-asc'">
@@ -92,7 +92,7 @@
                   [class.filter-option-label--active]="sortBy() === 'name-asc'"
                   [class.filter-option-label--inactive]="sortBy() !== 'name-asc'">Name A–Z</span>
               </label>
-              <label class="filter-option" (click)="sortBy.set('name-desc')">
+              <label class="filter-option" (click)="changeSortBy('name-desc')">
                 <div class="filter-checkbox"
                   [class.filter-checkbox--checked]="sortBy() === 'name-desc'"
                   [class.filter-checkbox--unchecked]="sortBy() !== 'name-desc'">
@@ -104,7 +104,7 @@
                   [class.filter-option-label--active]="sortBy() === 'name-desc'"
                   [class.filter-option-label--inactive]="sortBy() !== 'name-desc'">Name Z–A</span>
               </label>
-              <label class="filter-option" (click)="sortBy.set('price-asc')">
+              <label class="filter-option" (click)="changeSortBy('price-asc')">
                 <div class="filter-checkbox"
                   [class.filter-checkbox--checked]="sortBy() === 'price-asc'"
                   [class.filter-checkbox--unchecked]="sortBy() !== 'price-asc'">
@@ -116,7 +116,7 @@
                   [class.filter-option-label--active]="sortBy() === 'price-asc'"
                   [class.filter-option-label--inactive]="sortBy() !== 'price-asc'">Price: Low to High</span>
               </label>
-              <label class="filter-option" (click)="sortBy.set('price-desc')">
+              <label class="filter-option" (click)="changeSortBy('price-desc')">
                 <div class="filter-checkbox"
                   [class.filter-checkbox--checked]="sortBy() === 'price-desc'"
                   [class.filter-checkbox--unchecked]="sortBy() !== 'price-desc'">
@@ -268,25 +268,33 @@
             <!-- Pagination controls -->
             @if (totalPages() > 1) {
               <nav class="pagination">
-                <button class="pagination-btn"
+                <button class="pagination-btn pagination-btn--nav"
                   [disabled]="currentPage() === 0"
-                  (click)="goToPage(currentPage() - 1)">
+                  (click)="goToPage(currentPage() - 1)"
+                  title="Previous page">
                   <span class="material-symbols-outlined">chevron_left</span>
                 </button>
 
                 @for (page of pageNumbers; track page) {
-                  <button class="pagination-btn"
-                    [class.pagination-btn--active]="page === currentPage()"
-                    (click)="goToPage(page)">{{ page + 1 }}</button>
+                  @if (page === -1) {
+                    <span class="pagination-ellipsis">...</span>
+                  } @else {
+                    <button class="pagination-btn"
+                      [class.pagination-btn--active]="page === currentPage()"
+                      (click)="goToPage(page)">{{ page + 1 }}</button>
+                  }
                 }
 
-                <button class="pagination-btn"
+                <button class="pagination-btn pagination-btn--nav"
                   [disabled]="currentPage() === totalPages() - 1"
-                  (click)="goToPage(currentPage() + 1)">
+                  (click)="goToPage(currentPage() + 1)"
+                  title="Next page">
                   <span class="material-symbols-outlined">chevron_right</span>
                 </button>
               </nav>
-              <p class="pagination-meta">{{ totalElements() }} pieces total · Page {{ currentPage() + 1 }} of {{ totalPages() }}</p>
+              <p class="pagination-meta">
+                Showing {{ currentPage() * 20 + 1 }}–{{ Math.min((currentPage() + 1) * 20, totalElements()) }} of {{ totalElements() }} pieces
+              </p>
             }
           }
         </div>

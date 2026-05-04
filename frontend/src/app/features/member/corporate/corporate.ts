@@ -32,10 +32,19 @@ export class Corporate implements OnInit {
 
   ngOnInit(): void {
     this.userName = this.auth.getCurrentUser()?.name ?? '';
-    this.corporateService.getStore().subscribe({ next: (s) => this.store = s });
+    this.corporateService.getStore().subscribe({ 
+      next: (s) => this.store = s,
+      error: (err) => { 
+        console.error('Failed to load store:', err);
+        this.loading = false;
+      }
+    });
     this.corporateService.getAnalytics().subscribe({
       next: (a) => { this.analytics = a; this.loading = false; },
-      error: () => { this.loading = false; }
+      error: (err) => { 
+        console.error('Failed to load analytics:', err);
+        this.loading = false; 
+      }
     });
   }
 

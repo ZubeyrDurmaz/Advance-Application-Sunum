@@ -8,6 +8,10 @@ import com.example.backend.repository.ReviewRepository;
 import com.example.backend.repository.ProductRepository;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +30,12 @@ public class ReviewService {
         return reviewRepository.findByProduct_IdOrderByCreatedAtDesc(productId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    public Page<ReviewResponse> getReviewsByProductIdPaginated(String productId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Review> reviewPage = reviewRepository.findByProduct_Id(productId, pageable);
+        return reviewPage.map(this::toResponse);
     }
 
     public ReviewResponse addReview(String productId, String userEmail, int starRating, String sentiment) {

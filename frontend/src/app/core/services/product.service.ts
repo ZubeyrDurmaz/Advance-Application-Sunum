@@ -61,6 +61,33 @@ export class ProductService {
     });
   }
 
+  getProductsFiltered(
+    page: number,
+    size: number,
+    search?: string,
+    categoryId?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    availability?: string,
+    sortBy: string = 'name',
+    sortDirection: string = 'asc'
+  ): Observable<PaginatedResponse<ProductResponse>> {
+    let params: any = {
+      page: page.toString(),
+      size: size.toString(),
+      sortBy,
+      sortDirection
+    };
+
+    if (search) params.search = search;
+    if (categoryId) params.categoryId = categoryId;
+    if (minPrice !== undefined) params.minPrice = minPrice.toString();
+    if (maxPrice !== undefined) params.maxPrice = maxPrice.toString();
+    if (availability) params.availability = availability;
+
+    return this.http.get<PaginatedResponse<ProductResponse>>(this.apiUrl, { params });
+  }
+
   clearCache(): void {
     this.cache.clear();
   }

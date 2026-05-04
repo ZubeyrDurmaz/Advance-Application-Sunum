@@ -9,6 +9,9 @@ export const routes: Routes = [
   { path: 'signup', loadComponent: () => import('./features/auth/signup/signup').then(m => m.Signup) },
   { path: 'product/:slug', loadComponent: () => import('./features/product-detail/product-detail').then(m => m.ProductDetail) },
   { path: 'cart', loadComponent: () => import('./features/cart/cart').then(m => m.Cart) },
+  { path: 'checkout', canActivate: [authGuard], loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent) },
+  { path: 'checkout/success', loadComponent: () => import('./features/checkout/success/success.component').then(m => m.SuccessComponent) },
+  { path: 'checkout/cancel', loadComponent: () => import('./features/checkout/cancel/cancel.component').then(m => m.CancelComponent) },
   { path: 'chronos-ai', loadComponent: () => import('./features/chronos-ai/chronos-ai').then(m => m.ChronosAi) },
 
   // Individual

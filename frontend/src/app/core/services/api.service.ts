@@ -12,6 +12,19 @@ export interface ProductResponse {
   categoryName: string;
   storeName: string;
   createdAt: string;
+  // Marketing / display data (from DB)
+  imageUrl?: string;
+  description?: string;
+  brand?: string;
+  model?: string;
+  movement?: string;
+  material?: string;
+  diameter?: string;
+  powerReserve?: string;
+  waterResistance?: string;
+  availabilityStatus?: string;
+  features?: string[];
+  images?: string[];
 }
 
 export interface CategoryResponse {

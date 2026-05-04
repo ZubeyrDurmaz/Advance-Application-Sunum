@@ -140,8 +140,13 @@
 
       <!-- Product Reviews -->
       <div class="analytics-chart-card" style="margin-top:2rem;margin-bottom:2rem;">
-        <h3 class="analytics-chart-title">Product Reviews</h3>
-        @if (reviews.length === 0) {
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+          <h3 class="analytics-chart-title" style="margin-bottom:0;">Product Reviews</h3>
+          @if (allReviews.length > 0) {
+            <span class="an-cell-muted" style="font-size:0.875rem;">Showing {{ reviews.length }} of {{ allReviews.length }}</span>
+          }
+        </div>
+        @if (allReviews.length === 0) {
           <div class="inv-empty" style="padding:2rem 0;">
             <span class="material-symbols-outlined">star_border</span>
             <p>No reviews yet.</p>
@@ -166,6 +171,14 @@
               </div>
             }
           </div>
+          @if (hasMoreReviews) {
+            <div style="text-align:center;margin-top:1.5rem;">
+              <button class="load-more-btn" (click)="loadMoreReviews()">
+                <span class="material-symbols-outlined">expand_more</span>
+                Load More Reviews
+              </button>
+            </div>
+          }
         }
       </div>
 

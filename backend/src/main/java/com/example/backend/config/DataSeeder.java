@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.backend.entity.BillingProfile;
 import com.example.backend.entity.Category;
 import com.example.backend.entity.CustomerProfile;
 import com.example.backend.entity.DiscountCode;
@@ -30,6 +31,7 @@ import com.example.backend.entity.User;
 import com.example.backend.entity.UserAddress;
 import com.example.backend.entity.UserPaymentMethod;
 import com.example.backend.entity.Warehouse;
+import com.example.backend.repository.BillingProfileRepository;
 import com.example.backend.repository.CategoryRepository;
 import com.example.backend.repository.CustomerProfileRepository;
 import com.example.backend.repository.DiscountCodeRepository;
@@ -56,6 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final BillingProfileRepository billingProfileRepository;
     private final UserAddressRepository userAddressRepository;
     private final UserPaymentMethodRepository userPaymentMethodRepository;
     private final StoreRepository storeRepository;
@@ -121,6 +124,11 @@ public class DataSeeder implements CommandLineRunner {
             seedUserPaymentMethods();
         }
 
+        // 9.5 Seed billing profiles
+        if (billingProfileRepository.count() == 0) {
+            seedBillingProfiles();
+        }
+
         // 10. Seed warehouses
         if (warehouseRepository.count() == 0) {
             seedWarehouses();
@@ -162,6 +170,7 @@ public class DataSeeder implements CommandLineRunner {
         updateExistingUsers();
         updateExistingCategories();
         updateExistingProducts();
+        backfillProductMarketingData();
         updateExistingOrders();
         updateExistingOrderItems();
         updateExistingReviews();
@@ -251,36 +260,226 @@ public class DataSeeder implements CommandLineRunner {
         Map<String, Category> catMap = new java.util.HashMap<>();
         categoryRepository.findAll().forEach(c -> catMap.put(c.getName(), c));
 
-        Object[][] products = {
-            {"VG-SK-001",               "Vanguard Skeleton",      12400, "Grand Complications",           5},
-            {"HM-MP-002",               "Heritage Moonphase",     18950, "Complications",                 3},
-            {"OM-300-003",              "Ocean Master 300",        9200, "Professional Diving",            8},
-            {"126610LN",                "Submariner Date",        10400, "Professional Diving",            4},
-            {"116500LN",                "Cosmograph Daytona",     32450, "Grand Complications",            2},
-            {"5227R-001",               "Calatrava 5227R",        38200, "Dress Watch",                    3},
-            {"15202ST",                 "Royal Oak Jumbo",        72000, "Iconic Sports",                  1},
-            {"7900V/110R",              "Overseas Dual Time",     51500, "Travel Watch",                   2},
-            {"310.30.42.50.01.001",     "Speedmaster Moonwatch",   6240, "Professional Chronograph",       6},
-            {"CBN2A1B.FC6492",          "Carrera Chronograph",     4100, "Racing Chronograph",             7},
-            {"5711/1A-010",             "Nautilus Blue Dial",     89000, "Luxury Sports",                  1},
-            {"95.9000.9004",            "Defy El Primero",        11500, "High-Frequency Chronograph",     4},
-            {"WSSA0018",                "Santos de Cartier",       6800, "Iconic Dress Sport",             5},
-        };
-
-        for (Object[] p : products) {
+        for (ProductSeed s : PRODUCT_CATALOG) {
             Product product = Product.builder()
                     .id(UUID.randomUUID().toString())
-                    .sku((String) p[0])
-                    .name((String) p[1])
-                    .unitPrice(BigDecimal.valueOf((int) p[2]))
-                    .category(catMap.get((String) p[3]))
+                    .sku(s.sku)
+                    .name(s.name)
+                    .unitPrice(BigDecimal.valueOf(s.price))
+                    .category(catMap.get(s.categoryName))
                     .store(store)
-                    .stockQuantity((int) p[4])
+                    .stockQuantity(s.stock)
+                    .imageUrl(s.imageUrl)
+                    .description(s.description)
+                    .brand(s.brand)
+                    .model(s.model)
+                    .movement(s.movement)
+                    .material(s.material)
+                    .diameter(s.diameter)
+                    .powerReserve(s.powerReserve)
+                    .waterResistance(s.waterResistance)
+                    .availabilityStatus(s.stock > 0 ? "IN_STOCK" : "OUT_OF_STOCK")
+                    .features(new java.util.ArrayList<>(java.util.Arrays.asList(s.features)))
+                    .images(new java.util.ArrayList<>(java.util.Arrays.asList(s.images)))
                     .build();
             productRepository.save(product);
         }
-        log.info("  {} products seeded.", products.length);
+        log.info("  {} products seeded.", PRODUCT_CATALOG.length);
     }
+
+    /**
+     * Force-set the marketing fields (image, description, features, ...) for
+     * every catalog SKU. This guarantees that every product served from the
+     * database has real, curated metadata - there are no client-side
+     * placeholders anywhere in the application.
+     */
+    private void backfillProductMarketingData() {
+        log.info("Backfilling product marketing data (image / description / features)...");
+
+        Map<String, ProductSeed> bySku = new java.util.HashMap<>();
+        for (ProductSeed s : PRODUCT_CATALOG) bySku.put(s.sku, s);
+
+        int updated = 0;
+        for (Product p : productRepository.findAll()) {
+            ProductSeed s = bySku.get(p.getSku());
+            if (s == null) continue;
+
+            // Always overwrite with the canonical catalog values so the DB is
+            // the single source of truth - no random/seeded mock content lingers.
+            p.setImageUrl(s.imageUrl);
+            p.setDescription(s.description);
+            p.setBrand(s.brand);
+            p.setModel(s.model);
+            p.setMovement(s.movement);
+            p.setMaterial(s.material);
+            p.setDiameter(s.diameter);
+            p.setPowerReserve(s.powerReserve);
+            p.setWaterResistance(s.waterResistance);
+            p.setFeatures(new java.util.ArrayList<>(java.util.Arrays.asList(s.features)));
+            p.setImages(new java.util.ArrayList<>(java.util.Arrays.asList(s.images)));
+            p.setAvailabilityStatus(p.getStockQuantity() != null && p.getStockQuantity() > 0
+                    ? "IN_STOCK" : "OUT_OF_STOCK");
+            productRepository.save(p);
+            updated++;
+        }
+        log.info("  Marketing data ensured for {} products.", updated);
+    }
+
+    // -- Product catalog (single source of truth) --------------------------
+    private static final class ProductSeed {
+        final String sku, name, categoryName, brand, model, description,
+                imageUrl, movement, material, diameter, powerReserve, waterResistance;
+        final int price, stock;
+        final String[] features;
+        final String[] images;
+        ProductSeed(String sku, String name, int price, String categoryName, int stock,
+                    String brand, String model, String description, String imageUrl,
+                    String movement, String material, String diameter,
+                    String powerReserve, String waterResistance,
+                    String[] features, String[] images) {
+            this.sku = sku; this.name = name; this.price = price;
+            this.categoryName = categoryName; this.stock = stock;
+            this.brand = brand; this.model = model;
+            this.description = description; this.imageUrl = imageUrl;
+            this.movement = movement; this.material = material;
+            this.diameter = diameter; this.powerReserve = powerReserve;
+            this.waterResistance = waterResistance;
+            this.features = features; this.images = images;
+        }
+    }
+
+    private static final ProductSeed[] PRODUCT_CATALOG = new ProductSeed[] {
+        new ProductSeed("VG-SK-001", "Vanguard Skeleton", 12400, "Grand Complications", 5,
+            "Vanguard", "Skeleton",
+            "The Vanguard Skeleton reveals the intricate mechanics of its automatic movement through a meticulously crafted open-worked dial. Every bridge and plate is hand-finished to perfection.",
+            "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=1200&q=80",
+            "Automatic Skeleton", "Brushed Steel", "42 mm", "48 Hours", "100m",
+            new String[]{"Open-worked skeleton dial", "Hand-finished bridges", "Sapphire crystal case back", "Anti-magnetic shielding"},
+            new String[]{
+                "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("HM-MP-002", "Heritage Moonphase", 18950, "Complications", 3,
+            "Heritage", "Moonphase",
+            "A poetic complication that tracks the lunar cycle with breathtaking accuracy. Set in 18k rose gold with a hand-stitched alligator leather strap.",
+            "https://images.unsplash.com/photo-1548171915-e79a380a2a4b?auto=format&fit=crop&w=1200&q=80",
+            "Manual Winding", "18k Rose Gold", "39 mm", "72 Hours", "30m",
+            new String[]{"Astronomical moonphase", "Hand-stitched alligator strap", "Domed sapphire crystal", "Guilloche dial"},
+            new String[]{
+                "https://images.unsplash.com/photo-1548171915-e79a380a2a4b?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("OM-300-003", "Ocean Master 300", 9200, "Professional Diving", 8,
+            "Ocean", "Master 300",
+            "Engineered for the depths, the Ocean Master 300 combines professional diving capability with refined aesthetics. Water resistant to 300 meters.",
+            "https://images.unsplash.com/photo-1606293459336-cf61c12f3b69?auto=format&fit=crop&w=1200&q=80",
+            "Automatic", "Titanium", "44 mm", "60 Hours", "300m / 1000ft",
+            new String[]{"Helium escape valve", "Unidirectional rotating bezel", "SuperLuminova indices", "Screw-down crown"},
+            new String[]{
+                "https://images.unsplash.com/photo-1606293459336-cf61c12f3b69?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1622434641406-a158123450f9?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("126610LN", "Submariner Date", 10400, "Professional Diving", 4,
+            "Rolex", "Submariner Date",
+            "The quintessential diving watch. The Submariner Date combines robust functionality with timeless elegance, a true icon of watchmaking.",
+            "https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?auto=format&fit=crop&w=1200&q=80",
+            "Caliber 3235", "Oystersteel", "41 mm", "70 Hours", "300m",
+            new String[]{"Cerachrom bezel insert", "Chromalight display", "Triplock crown", "Glidelock bracelet extension"},
+            new String[]{
+                "https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("116500LN", "Cosmograph Daytona", 32450, "Grand Complications", 2,
+            "Rolex", "Cosmograph Daytona",
+            "Born to race. The Cosmograph Daytona is the ultimate chronograph, designed for professional racing drivers who demand precision timing.",
+            "https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?auto=format&fit=crop&w=1200&q=80",
+            "Caliber 4130", "Oystersteel", "40 mm", "72 Hours", "100m",
+            new String[]{"Tachymetric scale", "Column-wheel chronograph", "Cerachrom bezel", "Oysterlock safety clasp"},
+            new String[]{
+                "https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1518131672697-613becd4fab5?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("5227R-001", "Calatrava 5227R", 38200, "Dress Watch", 3,
+            "Patek Philippe", "Calatrava 5227R",
+            "The Calatrava 5227R in rose gold epitomizes the pure, round wristwatch. Its officer-style case back conceals a hand-finished movement of extraordinary refinement.",
+            "https://images.unsplash.com/photo-1622434641406-a158123450f9?auto=format&fit=crop&w=1200&q=80",
+            "Caliber 324 S C", "18k Rose Gold", "39 mm", "45 Hours", "30m",
+            new String[]{"Officer-style hinged case back", "Lacquered white dial", "Hand-finished movement", "Geneva Seal certified"},
+            new String[]{
+                "https://images.unsplash.com/photo-1622434641406-a158123450f9?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("15202ST", "Royal Oak Jumbo", 72000, "Iconic Sports", 1,
+            "Audemars Piguet", "Royal Oak Jumbo",
+            "The Royal Oak Jumbo - the original luxury sports watch. Designed by Gerald Genta in 1972, its octagonal bezel and integrated bracelet remain icons of modern horology.",
+            "https://images.unsplash.com/photo-1639037687665-37e3f60afba0?auto=format&fit=crop&w=1200&q=80",
+            "Caliber 2121", "Stainless Steel", "39 mm", "40 Hours", "50m",
+            new String[]{"Octagonal bezel with eight screws", "Tapisserie Evidee dial", "Integrated steel bracelet", "Ultra-thin self-winding caliber"},
+            new String[]{
+                "https://images.unsplash.com/photo-1639037687665-37e3f60afba0?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("7900V/110R", "Overseas Dual Time", 51500, "Travel Watch", 2,
+            "Vacheron Constantin", "Overseas Dual Time",
+            "The Overseas Dual Time displays two time zones simultaneously with effortless elegance. A companion for the global traveller who refuses to compromise on refinement.",
+            "https://images.unsplash.com/photo-1614703418578-7e0c0796cf32?auto=format&fit=crop&w=1200&q=80",
+            "Caliber 5110 DT", "18k Pink Gold", "41 mm", "60 Hours", "150m",
+            new String[]{"Dual time zone display", "Day-night indicator", "Interchangeable strap system", "Maltese cross rotor"},
+            new String[]{
+                "https://images.unsplash.com/photo-1614703418578-7e0c0796cf32?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("310.30.42.50.01.001", "Speedmaster Moonwatch", 6240, "Professional Chronograph", 6,
+            "Omega", "Speedmaster Moonwatch",
+            "The watch that went to the moon. The Speedmaster Moonwatch Professional has been NASA's choice since 1965, a testament to its unmatched reliability under extreme conditions.",
+            "https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1200&q=80",
+            "Caliber 3861", "Stainless Steel", "42 mm", "50 Hours", "50m",
+            new String[]{"NASA flight-qualified", "Hesalite crystal", "Tachymeter scale", "Co-axial Master Chronometer"},
+            new String[]{
+                "https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("CBN2A1B.FC6492", "Carrera Chronograph", 4100, "Racing Chronograph", 7,
+            "TAG Heuer", "Carrera Chronograph",
+            "Born on the racing circuits of the 1960s, the Carrera Chronograph captures the spirit of motorsport with its clean, legible dial and precise timing capabilities.",
+            "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?auto=format&fit=crop&w=1200&q=80",
+            "Caliber Heuer 02", "Stainless Steel", "44 mm", "80 Hours", "100m",
+            new String[]{"Column-wheel chronograph", "Skeleton dial", "Ceramic tachymeter bezel", "Black alligator strap"},
+            new String[]{
+                "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1518131672697-613becd4fab5?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("5711/1A-010", "Nautilus Blue Dial", 89000, "Luxury Sports", 1,
+            "Patek Philippe", "Nautilus",
+            "The Nautilus with its iconic porthole-inspired case is perhaps the most coveted watch in the world. The blue gradient dial is a masterpiece of dial-making artistry.",
+            "https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1200&q=80",
+            "Caliber 26-330 S C", "Stainless Steel", "40 mm", "45 Hours", "120m",
+            new String[]{"Horizontally embossed blue dial", "Integrated steel bracelet", "Two-piece porthole case", "Sweep seconds"},
+            new String[]{
+                "https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1639037687665-37e3f60afba0?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("95.9000.9004", "Defy El Primero", 11500, "High-Frequency Chronograph", 4,
+            "Zenith", "Defy El Primero",
+            "The Defy El Primero houses the legendary El Primero movement - the world's first automatic chronograph caliber, beating at 36,000 vph for 1/10th second precision.",
+            "https://images.unsplash.com/photo-1518131672697-613becd4fab5?auto=format&fit=crop&w=1200&q=80",
+            "El Primero 9004", "Titanium", "44 mm", "60 Hours", "100m",
+            new String[]{"1/100th second chronograph", "Twin-regulator escapement", "Open-worked dial", "Carbon fibre details"},
+            new String[]{
+                "https://images.unsplash.com/photo-1518131672697-613becd4fab5?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1614703418578-7e0c0796cf32?auto=format&fit=crop&w=1200&q=80"
+            }),
+        new ProductSeed("WSSA0018", "Santos de Cartier", 6800, "Iconic Dress Sport", 5,
+            "Cartier", "Santos de Cartier",
+            "The Santos de Cartier is the world's first purpose-built wristwatch, created in 1904 for aviator Alberto Santos-Dumont. Its exposed screws and square case remain instantly recognizable.",
+            "https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1200&q=80",
+            "Caliber 1847 MC", "Stainless Steel", "39.8 mm", "42 Hours", "100m",
+            new String[]{"QuickSwitch interchangeable bracelet", "SmartLink self-fitting bracelet", "Beaded crown with sapphire", "Roman numeral dial"},
+            new String[]{
+                "https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1606293459336-cf61c12f3b69?auto=format&fit=crop&w=1200&q=80"
+            }),
+    };
 
     private void seedReviews() {
         log.info("Seeding reviews...");
@@ -1023,5 +1222,51 @@ public class DataSeeder implements CommandLineRunner {
         }
         
         log.info("  {} user payment methods seeded.", paymentMethodCount);
+    }
+
+    private void seedBillingProfiles() {
+        log.info("Seeding billing profiles...");
+        
+        List<User> users = userRepository.findAll();
+        Random random = new Random();
+        
+        int profileCount = 0;
+        for (User user : users) {
+            // 70% of users have a billing profile
+            if (random.nextDouble() < 0.7) {
+                // Get user's first address (if any) to use as billing address
+                List<UserAddress> userAddresses = userAddressRepository.findByUserId(user.getId());
+                UserAddress billingAddress = userAddresses.isEmpty() ? null : userAddresses.get(0);
+                
+                // Generate account holder name (usually same as user name or slightly different)
+                String accountHolderName = user.getName();
+                if (random.nextDouble() < 0.2) {
+                    // 20% chance of different name (e.g., company name or spouse name)
+                    String[] alternativeNames = {
+                        user.getName() + " Inc.",
+                        user.getName() + " LLC",
+                        user.getName().split(" ")[0] + " Family",
+                        "Mr. " + user.getName(),
+                        "Ms. " + user.getName()
+                    };
+                    accountHolderName = alternativeNames[random.nextInt(alternativeNames.length)];
+                }
+                
+                BillingProfile billingProfile = BillingProfile.builder()
+                        .id(UUID.randomUUID().toString())
+                        .user(user)
+                        .address(billingAddress)
+                        .accountHolderName(accountHolderName)
+                        .build();
+                
+                billingProfileRepository.save(billingProfile);
+                profileCount++;
+                
+                log.info("    Billing profile created for user: {} ({})", 
+                        user.getEmail(), accountHolderName);
+            }
+        }
+        
+        log.info("  {} billing profiles seeded.", profileCount);
     }
 }

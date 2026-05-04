@@ -45,8 +45,6 @@
           <span>Type</span>
           <span>Value</span>
           <span>Valid Period</span>
-          <span>Usage</span>
-          <span>Store</span>
           <span>Status</span>
           <span>Actions</span>
         </div>
@@ -60,11 +58,6 @@
               <span class="dc-date-sep">→</span>
               <span class="dc-date">{{ formatDate(d.validUntil) }}</span>
             </div>
-            <div class="dc-usage">
-              <span class="dc-usage-count">{{ d.usedCount ?? 0 }} / {{ d.maxUses ?? '∞' }}</span>
-              <span class="dc-usage-remaining">{{ remainingUses(d) }} left</span>
-            </div>
-            <span class="dc-store">{{ d.storeName ?? '—' }}</span>
             <span class="dc-status dc-status--{{ d.status?.toLowerCase() }}">{{ d.status }}</span>
             <div class="dc-actions">
               <button class="icon-btn" (click)="toggleStatus(d)" [title]="d.status === 'ACTIVE' ? 'Deactivate' : 'Activate'">

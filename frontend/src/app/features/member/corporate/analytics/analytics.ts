@@ -18,6 +18,8 @@ export class Analytics implements OnInit {
   data: CorporateAnalytics | null = null;
   orders: OrderResponse[] = [];
   reviews: ReviewResponse[] = [];
+  allReviews: ReviewResponse[] = []; // Tüm reviews
+  displayedReviewsCount = 10; // İlk gösterilecek review sayısı
   loading = true;
   errorMessage = '';
   maxRevenue = 0;
@@ -49,13 +51,27 @@ export class Analytics implements OnInit {
         // Recent orders — son 10 sipariş
         this.orders = orders.slice(0, 10);
 
-        // Reviews
-        this.reviews = reviews;
+        // Reviews - tümünü sakla, ilk 10'unu göster
+        this.allReviews = reviews;
+        this.reviews = reviews.slice(0, this.displayedReviewsCount);
 
         this.loading = false;
       },
-      error: () => { this.errorMessage = 'Failed to load analytics.'; this.loading = false; }
+      error: (err) => { 
+        console.error('Failed to load analytics data:', err);
+        this.errorMessage = 'Failed to load analytics.'; 
+        this.loading = false; 
+      }
     });
+  }
+
+  loadMoreReviews(): void {
+    this.displayedReviewsCount += 10;
+    this.reviews = this.allReviews.slice(0, this.displayedReviewsCount);
+  }
+
+  get hasMoreReviews(): boolean {
+    return this.displayedReviewsCount < this.allReviews.length;
   }
 
   formatPrice(p: number): string {

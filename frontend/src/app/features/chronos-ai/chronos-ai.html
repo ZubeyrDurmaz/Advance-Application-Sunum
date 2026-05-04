@@ -29,7 +29,13 @@
                 @for (watch of message.recommendations; track watch.name) {
                   <div class="ai-watch-card ai-glow">
                     <div class="ai-watch-image-wrap">
-                      <img class="ai-watch-image" [src]="watch.image" [alt]="watch.name" />
+                      @if (watch.image) {
+                        <img class="ai-watch-image" [src]="watch.image" [alt]="watch.name" />
+                      } @else {
+                        <div class="ai-watch-image-placeholder">
+                          <span class="material-symbols-outlined">watch</span>
+                        </div>
+                      }
                     </div>
                     <h3 class="ai-watch-name">{{ watch.name }}</h3>
                     <p class="ai-watch-ref">{{ watch.ref }}</p>

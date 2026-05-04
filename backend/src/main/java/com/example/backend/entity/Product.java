@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -36,6 +38,53 @@ public class Product {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    // -- Marketing / display fields ----------------------------------------
+    @Column(name = "image_url", length = 1000)
+    private String imageUrl;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "brand", length = 120)
+    private String brand;
+
+    @Column(name = "model", length = 120)
+    private String model;
+
+    @Column(name = "movement", length = 120)
+    private String movement;
+
+    @Column(name = "material", length = 120)
+    private String material;
+
+    @Column(name = "diameter", length = 50)
+    private String diameter;
+
+    @Column(name = "power_reserve", length = 50)
+    private String powerReserve;
+
+    @Column(name = "water_resistance", length = 50)
+    private String waterResistance;
+
+    @Column(name = "availability_status", length = 30)
+    private String availabilityStatus;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "product_features",
+                     joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "feature", length = 500)
+    @Builder.Default
+    @org.hibernate.annotations.BatchSize(size = 25)
+    private List<String> features = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "product_images",
+                     joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "image_url", length = 1000)
+    @Builder.Default
+    @org.hibernate.annotations.BatchSize(size = 25)
+    private List<String> images = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

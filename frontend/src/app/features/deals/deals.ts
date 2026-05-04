@@ -20,8 +20,6 @@ interface DealWatch {
   slug: string;
 }
 
-const PLACEHOLDER_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuC6skQdK0hl6R30Q0C5uVJvH4sPfO61wi-eOBpssod_edgeuBVtZH1rA7DQpnbplYos1CQOff5gU8AXfx_EIsGVl05dWgXrI_szVDNP4uZ8legkNRXgYiIzCJBEfx_PwelLqOGL1ei7KJsCiag1KzOfuTyHgOwjfyHEmFtfsADmVR0346if23XJRJeOT2_F7owbQPT1GAuQwbL4KNWAL6U0A0O3n4C0D4FsGTw2SudjgQqmW7ciojccoFxoug-XZ7vEf62knf3ZG3VO';
-
 @Component({
   selector: 'app-deals',
   imports: [FormsModule, RouterLink, Navbar, Footer, LazyLoadDirective],
@@ -66,7 +64,8 @@ export class Deals implements OnInit {
       badge: badge.text,
       badgeStyle: badge.style,
       slug: p.sku,
-      image: PLACEHOLDER_IMG,
+      // Image comes from the database (image_url / images columns)
+      image: p.imageUrl || (p.images && p.images.length > 0 ? p.images[0] : ''),
     };
   }
 

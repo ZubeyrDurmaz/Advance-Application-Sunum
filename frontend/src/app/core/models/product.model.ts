@@ -11,7 +11,9 @@
 
 /**
  * Product response from backend API
- * Represents a product with all its details including category and store information
+ * Represents a product with all its details including category and store information.
+ * Image, description and feature lists come straight from the database — no
+ * client-side mock data is ever rendered.
  */
 export interface ProductResponse {
   id: string;
@@ -22,6 +24,20 @@ export interface ProductResponse {
   categoryName: string;
   storeName: string;
   createdAt: string;
+
+  // Marketing / display data (from DB)
+  imageUrl?: string;
+  description?: string;
+  brand?: string;
+  model?: string;
+  movement?: string;
+  material?: string;
+  diameter?: string;
+  powerReserve?: string;
+  waterResistance?: string;
+  availabilityStatus?: string;
+  features?: string[];
+  images?: string[];
 }
 
 /**

@@ -109,4 +109,14 @@ export class AdminDiscounts implements OnInit {
   remainingUses(d: DiscountCodeResponse): number {
     return (d.maxUses ?? 0) - (d.usedCount ?? 0);
   }
+
+  isMaxUsesReached(d: DiscountCodeResponse): boolean {
+    if (!d.maxUses) return false;
+    return (d.usedCount ?? 0) >= d.maxUses;
+  }
+
+  usagePercentage(d: DiscountCodeResponse): number {
+    if (!d.maxUses) return 0;
+    return Math.min(100, ((d.usedCount ?? 0) / d.maxUses) * 100);
+  }
 }
